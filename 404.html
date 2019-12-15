@@ -1,0 +1,40 @@
+---
+permalink: /404.html
+layout: default
+---
+
+<style type="text/css" media="screen">
+  .container {
+    margin: 10px auto;
+    max-width: 400px;
+    text-align: center;
+  }
+  h1 {
+    margin: 30px 0;
+    font-size: 4em;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+  a {
+    text-decoration: none;
+    display: inline-block;
+    padding: 5px 10px;
+  }
+</style>
+
+<div class="container">
+  <h1>404</h1>
+  <p><strong>Không tìm thấy trang :(</strong></p>
+  <p>Không tìm thấy trang được yêu cầu.</p>
+  <div class="f-header__box">
+    <div class="f-search">
+      <div class="f-search__box">
+        <!-- <label for="js-search-input" class="u-screen-reader-text">Tìm kiếm nội dung</label> -->
+        <input type="text" id="js-search-input" class="f-search__text" autocomplete="off" placeholder="Tìm kiếm ở đây">
+        <div data-icon='ei-search' data-size='s'></div>
+      </div>
+      <ul id="js-results-container" class="c-search-results-list"></ul>
+    </div>
+  </div>
+  <a href="{{ site.baseurl }}/" class="back-home">Về trang chủ</a>
+</div>

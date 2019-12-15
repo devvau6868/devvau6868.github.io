@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include head.html %}
+<body>
+	<div class="wrapper">
+		{{ content }}
+	</div>
+	{% if site.analytics %}
+		{% include analytics.html %}
+	{% endif %}
+
+	<div class="c-top" data-icon='ei-chevron-up' data-size='s' title="Scroll To Top"></div>
+	{% include script.html %}
+</body>
+</html>
