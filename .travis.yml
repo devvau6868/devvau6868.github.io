@@ -1,9 +1,5 @@
 language: ruby
 rvm:
-<<<<<<< HEAD
  - 2.5
  - jruby
-=======
- - 2.4
- - jruby
->>>>>>> 9c69d787e89dfb141cdf388d8621a64dff66b87a
+
