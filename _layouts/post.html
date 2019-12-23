@@ -24,7 +24,6 @@ layout: home
         <div class="page-share">
           <a href="https://twitter.com/intent/tweet?text={{ page.title }}&url={{ site.url }}{{ page.url }}" title="Share on Twitter" rel="nofollow" target="_blank">Twitter</a>
           <a href="https://facebook.com/sharer.php?u={{ site.url }}{{ page.url }}" title="Share on Facebook" rel="nofollow" target="_blank">Facebook</a>
-          <a href="https://plus.google.com/share?url={{ site.url }}{{ page.url }}" title="Share on Google+" rel="nofollow" target="_blank">Google+</a>
         </div>
         <div class="page-tag">
           {% for tag in page.tags %}
@@ -33,7 +32,7 @@ layout: home
         </div>
       </div>
       <div class="c-recent-post">
-        <h4 class="c-recent__title" data-toc-skip>Có thể bạn sẽ thích</h4>
+        <h4 class="c-recent__title" data-toc-skip>YOU MIGHT ALSO ENJOY</h4>
         <div class="c-recent__box">
         {% for post in site.related_posts limit:4 %}
         {% if post.img %}
@@ -53,6 +52,7 @@ layout: home
       </div>
     </div> <!-- End Wrap Content -->
   </div> <!-- End Page Content -->
+  <script async defer data-pin-hover="true" src="//assets.pinterest.com/js/pinit.js"></script>
   <div id="gitalk-container"></div>
   <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
   <script type="text/javascript">
