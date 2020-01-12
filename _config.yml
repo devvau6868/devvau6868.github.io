@@ -30,11 +30,11 @@ author-name:    DEV VÂU
 author-img:   elliot-alderson.jpg
 author-job:     Web Dev | Fullstack[overflow]
 # Social
-social-twitter: ellialdero # add your Twitter handle
-social-facebook: ellialdero # add your Facebook handle
-social-github: ellialdero # add your Github handle
-social-linkedin: ellialdero # add your Linkedin handle
-social-email: devvau.io@gmail.com # add your Email address
+social-twitter: thienv_dev # add your Twitter handle
+social-facebook: thienvdev # add your Facebook handle
+social-github: devvau6868 # add your Github handle
+social-linkedin: thienvu-dev # add your Linkedin handle
+social-email: thienvu.dev@gmail.com # add your Email address
 
 # Build settings
 markdown: kramdown
