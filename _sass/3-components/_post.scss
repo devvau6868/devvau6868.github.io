@@ -49,11 +49,10 @@
 .post-tag {
   a {
     text-decoration: none;
-    font-size: 10px;
-    padding: 3px 3px;
+    font-size: 12px;
+    padding: 5px 5px;
     margin-left: 10px;
     color: $dark-color;
-    text-transform: uppercase;
     border: 1px solid $dark-color;
     &:hover {
       text-decoration: underline;
