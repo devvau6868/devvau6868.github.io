@@ -17,10 +17,6 @@ $global-transition: .35s;
 	box-sizing: border-box;
   }
   
-  html {
-	line-height: 1.5;
-  }
-  
   body {
 	font-family: Comfortaa;
 	color: $body-color;
@@ -50,25 +46,22 @@ $global-transition: .35s;
   }
   
   blockquote {
-	border-left: 5px solid #000;
-	padding-left: 1.1rem;
+	border-left: 2px solid $blue-dark;
+	padding-left: 2rem;
 	margin-left: 1rem;
 	font-style: italic;
 	color: #ada8a8;
   }
-  
+
   pre {
-	padding: 1rem 2rem;
+	padding: 1rem;
 	overflow: auto;
 	white-space: pre-wrap;
 	word-wrap: break-word;
-	word-break: break-all;
-  
+	word-break: break-all;  
 	code {
 	  border: 0;
-	  padding-right: 0;
-	  padding-left: 0;
-	  overflow: auto;
+	  padding: 5px;
 	  white-space: pre-wrap;
 	  word-wrap: break-word;
 	  word-break: break-all;

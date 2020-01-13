@@ -9,7 +9,7 @@ $(document).ready(function () {
       searchInput: document.getElementById('js-search-input'),
       resultsContainer: document.getElementById('js-results-container'),
       json: '/search.json',
-      searchResultTemplate: '<li><a href="{url}">{title}</a></li>',
+      searchResultTemplate: '<li><a href="{url}">• {title}</a></li>',
       noResultsText: '<li>Không tìm thấy bài viết</li>'
     })
 

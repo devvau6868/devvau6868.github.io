@@ -56,6 +56,7 @@ Before proceeding, this tutorial assumes you have:
 * A global [installation of composer](https://getcomposer.org/download/), which will be used to install all dependencies for the project.
     * Note: Homebrew users can install composer by running brew install composer##
 
+
 # CometChat?
 CometChat is a developer platform that allows you to easily integrate chat features and building a realtime chat widget for a new or existing web and mobile application. It is a developer tool that makes implementing features such as;
 
@@ -91,6 +92,7 @@ To begin, from the terminal in your machine, navigate to your preferred project 
 git clone https://github.com/christiannwamba/lara-chat-app-starter.git
 {% endhighlight %}
 Next, move into the newly created project:
+
 {% highlight bash %}
 cd lara-chat-app-starter
 {% endhighlight %}
@@ -352,7 +354,7 @@ The approach for this application is to register a user into your application an
 
 To begin, you will create a new folder named `views` within `resources/js` folder. And within the newly created folder, create a new file and call it `Register.vue`. Open it and update its `<template></template>` section with the following content:
 
-{% highlight javascript %}
+{% highlight vue %}
 // resources/js/views/Register.vue
 <template>
     <div class="login-page">
