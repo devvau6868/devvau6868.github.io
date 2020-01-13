@@ -9,26 +9,27 @@ tags: [Laravel, Vue] # add tag
 
 It's been a while since I wrote about Laravel and thought I should do something fun with it. In this tutorial, I will show you how to build a web-based chat application using Laravel and Vue.js quickly. With a simple step by step guide, you will be able to create a system that supports user authentication and authorization before participating in a chat session.
 
->   Table of Contents
-> 
->       * What we will build
->       * Prerequisites
->       * CometChat?
->       * CometChat’s authentication flow
->       * Creating an authentication server using Laravel
->       * Setting up the Laravel application
->       * Creating routes
->       * Create the User Controller
->       * Create the master layout
->       * Getting started with the frontend
->       * Initialize CometChat
->       * Register and create a new user
->       * Authenticating users
->       * The chat view
->       * Update the router
->       * Configure the entry point
->       * Test the application
->       * Conclusion
+>Table of Contents
+>
+>
+>    * What we will build
+>    * Prerequisites
+>    * CometChat?
+>    * CometChat’s authentication flow
+>    * Creating an authentication server using Laravel
+>    * Setting up the Laravel application
+>    * Creating routes
+>    * Create the User Controller
+>    * Create the master layout
+>    * Getting started with the frontend
+>    * Initialize CometChat
+>    * Register and create a new user
+>    * Authenticating users
+>    * The chat view
+>    * Update the router
+>    * Configure the entry point
+>    * Test the application
+>    * Conclusion
 
 Due to the fact that Laravel is shipped with Vue.js by default, It is very easy to build single-page applications, handle frontend logic by creating [Vue components](https://vuejs.org/v2/guide/components.html) and use them like you would use a regular HTML tag inside the blade template of Laravel.
 
