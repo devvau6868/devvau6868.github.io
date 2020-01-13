@@ -1,0 +1,939 @@
+I"��<p>It’s been a while since I wrote about Laravel and thought I should do something fun with it. In this tutorial, I will show you how to build a web-based chat application using Laravel and Vue.js quickly. With a simple step by step guide, you will be able to create a system that supports user authentication and authorization before participating in a chat session.</p>
+
+<p>Due to the fact that Laravel is shipped with Vue.js by default, It is very easy to build single-page applications, handle frontend logic by creating <a href="https://vuejs.org/v2/guide/components.html">Vue components</a> and use them like you would use a regular HTML tag inside the blade template of Laravel.</p>
+
+<p>To make this chat application fully functional, you will leverage CometChat chat infrastructure to enhance the sharing of instant messages.</p>
+
+<h1 id="what-we-will-build">What we will build</h1>
+<p>At the end of this tutorial, you would have built a system that will allow users to send and receive messages in realtime, as shown below:</p>
+
+<p><img src="https://paper-attachments.dropbox.com/s_D634BB25EFFC0EAA9BC956CCBF00962894D99381865724A63C8FE9C72B11A92B_1576004249041_ezgif.com-video-to-gif+2.gif" alt="" /></p>
+
+<p>To join a chat session, a user will have to provide a unique <code class="highlighter-rouge">username</code> and <code class="highlighter-rouge">password</code> as credentials during the registration process, afterward, such user will be created on CometChat as well. This means when registering a new user within your application, the details of such users will be saved in your local database first and then sent to the CometChat server using its <a href="https://prodocs.cometchat.com/reference">REST API</a>. Laravel will be used to build a backend API needed for these processes and make provisions of endpoints for Vue.js on the frontend.</p>
+
+<p>If you would love to try out the working demo for this tutorial, you can download the complete source code <a href="https://github.com/christiannwamba/lara-chat-app">here on GitHub</a>.</p>
+
+<h1 id="prerequisites">Prerequisites</h1>
+<p>Before proceeding, this tutorial assumes you have:</p>
+
+<blockquote>
+  <p><strong>Essential Reading</strong>: <a href="https://bit.ly/2TtV1sA">Learn React from Scratch! (2020 Edition)</a></p>
+</blockquote>
+
+<ul>
+  <li>A PHP development environment setup.</li>
+  <li>Git installed on your computer. Follow this <a href="https://git-scm.com/">link to download</a> Git if otherwise</li>
+  <li>A global <a href="https://getcomposer.org/download/">installation of composer</a>, which will be used to install all dependencies for the project.
+    <ul>
+      <li>Note: Homebrew users can install composer by running brew install composer##</li>
+    </ul>
+  </li>
+</ul>
+
+<h1 id="cometchat">CometChat?</h1>
+<p>CometChat is a developer platform that allows you to easily integrate chat features and building a realtime chat widget for a new or existing web and mobile application. It is a developer tool that makes implementing features such as;</p>
+
+<ul>
+  <li>Group chat</li>
+  <li>One on One chat</li>
+  <li>Typing indicators</li>
+  <li>Read and delivered indicators</li>
+  <li>and a whole lot more, easy to craft.</li>
+</ul>
+
+<p>You can read more about CometChat here on Comet’s <a href="https://www.cometchat.com/">official website</a>.</p>
+
+<h1 id="cometchats-authentication-flow">CometChat’s authentication flow</h1>
+<p>It is compulsory that one must be authenticated as a user before you can make use of infrastructure made available by CometChat.</p>
+
+<p>As proof of concept or to test a demo application, you can make use of the sample users that are being generated automatically for every new application created on CometChat. But for a production-ready application, it is advisable to take it a step further by making use of our REST API to programmatically create unique users, as you would see later in the tutorial.</p>
+
+<p>Once a user is in place, authenticating such a user to CometChat, is as simple as calling the <code class="highlighter-rouge">CometChat.login()</code> the method from the JavaScript SDK. Before this method can work properly, you can either use the user’s UID and the auth-only secret key as a parameter for the <code class="highlighter-rouge">CometChat.login()</code> , or you can generate a unique auth token on CometChat via its REST API and use the generated token as they require a parameter.</p>
+
+<p>For the purpose of this tutorial, you will learn how to use the auth token for authenticating a user.</p>
+
+<h1 id="creating-an-authentication-server-using-laravel">Creating an authentication server using Laravel</h1>
+<p>While CometChat can handle the login process of users from your application, It is important to note that CometChat SDK can only maintain the session of the logged-in user within the SDK and will not be able to handle user authentication for your application. So here, you will build an authentication server using Laravel.</p>
+
+<h1 id="setting-up-the-laravel-application">Setting up the Laravel application</h1>
+<p>The get started easily, you are going to set up a group chat application on top of a Laravel 5.8 application on <a href="https://github.com/christiannwamba/lara-chat-app-starter">GitHub</a>. This starter template already contains the required assets, stylesheet, and a couple of dependencies for the app.</p>
+
+<p>You will be making use of Git to clone this repository and gradually add more code to make it fully functional.</p>
+
+<p>To begin, from the terminal in your machine, navigate to your preferred project directory and run the following command to clone the starter template from GitHub:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">// Clone repository
+git clone https://github.com/christiannwamba/lara-chat-app-starter.git</code></pre></figure>
+
+<p>Next, move into the newly created project:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cd </span>lara-chat-app-starter</code></pre></figure>
+
+<p>and install all the dependencies for Laravel using composer by running the following command:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">composer <span class="nb">install</span></code></pre></figure>
+
+<p>Now, create a <code class="highlighter-rouge">.env</code> file and then copy the content of <code class="highlighter-rouge">.env.example</code> into it:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">// create a .env file
+<span class="nb">touch</span> .env
+
+// update its content
+<span class="nb">cp</span> .env.example .env</code></pre></figure>
+
+<p>Generate a key for your project using the <code class="highlighter-rouge">artisan</code> command:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">php artisan key:generate</code></pre></figure>
+
+<p>Once you are done, the next step is to create a connection to your database. To achieve that, open the <code class="highlighter-rouge">.env</code> file and update the <code class="highlighter-rouge">DB_DATABASE</code>, <code class="highlighter-rouge">DB_USERNAME</code> and <code class="highlighter-rouge">DB_PASSWORD</code> values with the appropriate contents.</p>
+
+<blockquote>
+  <p>💡 To avoid running into any error, ensure that you have created a database before running the next command.</p>
+</blockquote>
+
+<p>After successfully completing this basic setup, you can now proceed to generate the database structure for your application using the following command:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">php artisan migrate</code></pre></figure>
+
+<p>The preceding command will run the migration file located in <code class="highlighter-rouge">database/migrations/</code> with a file name that looks like this <code class="highlighter-rouge">2014_10_12_000000_create_users_table.php</code> and create a <code class="highlighter-rouge">Users\</code> table with the appropriate fields.</p>
+
+<h1 id="creating-routes">Creating routes</h1>
+<p>In chronological order, what you want to achieve with the backend of this application is to create endpoints with the purpose of handling three different functionalities:</p>
+
+<ul>
+  <li>Registering a user</li>
+  <li>Logging in user into your application</li>
+  <li>Saving a unique auth token for each user.</li>
+</ul>
+
+<p>Since the intention is to build the backend as an API that will be consumed by Vue.js (Frontend), it is absolutely fine to make use of the routes specifically created for that purpose by Laravel. First, open the <code class="highlighter-rouge">routes/web.php</code> file and ensure that the content in it is the same as what you have below. Otherwise, update its content with:</p>
+
+<figure class="highlight"><pre><code class="language-php" data-lang="php"><span class="c1">// routes/web.php</span>
+
+<span class="nx">Route</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">'/{any}'</span><span class="p">,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">view</span><span class="p">(</span><span class="s1">'layouts.master'</span><span class="p">);</span>
+<span class="p">})</span><span class="o">-&gt;</span><span class="na">where</span><span class="p">(</span><span class="s1">'any'</span><span class="p">,</span><span class="s1">'.*'</span><span class="p">);</span></code></pre></figure>
+
+<p>The code snippet above was used to register a route that can respond to all HTTP verbs. This is ideal for this application as all the routing will be handled by Vue.js, and Laravel will only render a single master layout view named <code class="highlighter-rouge">layouts.master</code>. You will create this file in a bit. Next, in <code class="highlighter-rouge">routes/api.php</code>, add the following routes to the list:</p>
+
+<figure class="highlight"><pre><code class="language-php" data-lang="php"><span class="c1">// routes/web.php</span>
+<span class="nx">Route</span><span class="o">::</span><span class="na">post</span><span class="p">(</span><span class="s1">'/register'</span><span class="p">,</span> <span class="s1">'UserController@register'</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">middleware</span><span class="p">(</span><span class="s1">'guest'</span><span class="p">);</span>
+<span class="nx">Route</span><span class="o">::</span><span class="na">post</span><span class="p">(</span><span class="s1">'/login'</span><span class="p">,</span> <span class="s1">'UserController@login'</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">middleware</span><span class="p">(</span><span class="s1">'guest'</span><span class="p">);</span>
+<span class="nx">Route</span><span class="o">::</span><span class="na">post</span><span class="p">(</span><span class="s1">'/update/token'</span><span class="p">,</span> <span class="s1">'UserController@updateToken'</span><span class="p">);</span></code></pre></figure>
+
+<h1 id="create-the-user-controller">Create the User Controller</h1>
+<p>From your terminal, ensure that you are still within the root directory of the application and run the following command that will create a new <code class="highlighter-rouge">UserController</code>:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">php artisan make:controller UserController</code></pre></figure>
+
+<p>You will see the following output in the terminal:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">Controller created successfully</code></pre></figure>
+
+<p>This will automatically generate a new file named <code class="highlighter-rouge">UserController.php</code> located in <code class="highlighter-rouge">app/Http/UserController.php</code>. Inside this controller class, you will add the following methods to match your project routes: <code class="highlighter-rouge">register</code>, <code class="highlighter-rouge">login</code>, <code class="highlighter-rouge">updateToken</code>.</p>
+
+<p>Register a user Here, you will implement the logic to register a user for your application. Open the newly created <code class="highlighter-rouge">app/Http/Controllers/UserController.php</code> and update its content with the following:</p>
+
+<figure class="highlight"><pre><code class="language-php" data-lang="php">// app/Http/Controllers/UserController.php
+<span class="cp">&lt;?php</span>
+<span class="kn">namespace</span> <span class="nn">App\Http\Controllers</span><span class="p">;</span>
+
+<span class="kn">use</span> <span class="nn">App\User</span><span class="p">;</span>
+<span class="kn">use</span> <span class="nn">Illuminate\Http\Request</span><span class="p">;</span>
+<span class="kn">use</span> <span class="nn">Illuminate\Support\Facades\Hash</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="nc">UserController</span> <span class="k">extends</span> <span class="nx">Controller</span>
+<span class="p">{</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">register</span><span class="p">(</span><span class="nx">Request</span> <span class="nv">$request</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nv">$username</span> <span class="o">=</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'username'</span><span class="p">);</span>
+        <span class="nv">$password</span> <span class="o">=</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'password'</span><span class="p">);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">checkIfUserExist</span><span class="p">(</span><span class="nv">$username</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">response</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">json</span><span class="p">([</span>
+                <span class="s1">'message'</span> <span class="o">=&gt;</span> <span class="s1">'User already exist'</span>
+            <span class="p">],</span> <span class="mi">500</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nv">$password</span> <span class="o">=</span> <span class="nx">bcrypt</span><span class="p">(</span><span class="nv">$password</span><span class="p">);</span>
+            <span class="nx">User</span><span class="o">::</span><span class="na">create</span><span class="p">([</span>
+                <span class="s1">'username'</span> <span class="o">=&gt;</span> <span class="nv">$username</span><span class="p">,</span>
+                <span class="s1">'password'</span> <span class="o">=&gt;</span> <span class="nv">$password</span>
+            <span class="p">]);</span>
+            <span class="k">return</span> <span class="nx">response</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">json</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">private</span> <span class="k">function</span> <span class="nf">checkIfUserExist</span><span class="p">(</span><span class="nv">$username</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nv">$user</span> <span class="o">=</span> <span class="nx">User</span><span class="o">::</span><span class="na">where</span><span class="p">(</span><span class="s1">'username'</span><span class="p">,</span> <span class="nv">$username</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">first</span><span class="p">();</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nv">$user</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nv">$user</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>The method above uses Laravel’s <a href="https://github.com/christiannwamba/lara-chat-app-starter">Request method</a> to obtain the <code class="highlighter-rouge">username</code> and <code class="highlighter-rouge">password</code> of a particular user. And then, there is a check carried out to note if such a user exists in the database by calling a private method <code class="highlighter-rouge">checkIfUserExist()</code>, which will either return the <code class="highlighter-rouge">User</code> object if it exist or <code class="highlighter-rouge">false</code> if otherwise.</p>
+
+<p><strong>Authenticate the user within the application</strong> Now add the <code class="highlighter-rouge">login()</code> to handle the authentication of users within the application:</p>
+
+<figure class="highlight"><pre><code class="language-php" data-lang="php"><span class="k">public</span> <span class="k">function</span> <span class="nf">login</span><span class="p">(</span><span class="nx">Request</span> <span class="nv">$request</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$username</span> <span class="o">=</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'username'</span><span class="p">);</span>
+    <span class="nv">$password</span> <span class="o">=</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'password'</span><span class="p">);</span>
+
+    <span class="nv">$user</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">checkIfUserExist</span><span class="p">(</span><span class="nv">$username</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nv">$user</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nv">$confirmPassword</span> <span class="o">=</span> <span class="nx">Hash</span><span class="o">::</span><span class="na">check</span><span class="p">(</span><span class="nv">$password</span><span class="p">,</span> <span class="nv">$user</span><span class="o">-&gt;</span><span class="na">password</span><span class="p">);</span>
+        <span class="k">return</span> <span class="nx">response</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">json</span><span class="p">([</span>
+            <span class="s1">'status'</span> <span class="o">=&gt;</span> <span class="nv">$confirmPassword</span><span class="p">,</span>
+            <span class="s1">'token'</span> <span class="o">=&gt;</span> <span class="nv">$user</span><span class="o">-&gt;</span><span class="na">authToken</span>
+        <span class="p">]);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">response</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">json</span><span class="p">([</span>
+            <span class="s1">'message'</span> <span class="o">=&gt;</span> <span class="s2">"Invalid credentials"</span>
+        <span class="p">],</span> <span class="mi">500</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>Here, after grabbing the <code class="highlighter-rouge">username</code> and <code class="highlighter-rouge">password</code> of a particular user, you checked if the user exists in your project’s database. If found, you will confirm to ensure that the password hash matches the one that was provided by the user and then returns the auth token that was generated for the user during the registration process.</p>
+
+<p><strong>Save Users’ token in the database</strong> One of the approaches to authenticate users in CometChat is by calling the <code class="highlighter-rouge">CometChat.login()</code> and passing a generated <code class="highlighter-rouge">token</code> to it as an argument. CometChat already made a provision to <a href="https://prodocs.cometchat.com/reference">generate that on the fly through the REST API</a> without much hassle. You will do that once you start the implementation of the frontend logic. To save the generated token for each user, add the following method to the <code class="highlighter-rouge">UserController</code>:</p>
+
+<figure class="highlight"><pre><code class="language-php" data-lang="php"><span class="k">public</span> <span class="k">function</span> <span class="nf">updateToken</span><span class="p">(</span><span class="nx">Request</span> <span class="nv">$request</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$username</span> <span class="o">=</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'uid'</span><span class="p">);</span>
+    <span class="nv">$token</span> <span class="o">=</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'token'</span><span class="p">);</span>
+
+    <span class="nx">User</span><span class="o">::</span><span class="na">where</span><span class="p">(</span><span class="s1">'username'</span><span class="p">,</span> <span class="nv">$username</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">update</span><span class="p">([</span>
+        <span class="s1">'authToken'</span> <span class="o">=&gt;</span> <span class="nv">$token</span>
+    <span class="p">]);</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>This will receive the generated <code class="highlighter-rouge">Auth token</code> for the user by CometChat and use Laravel eloquent to update the Database with the value.</p>
+
+<h1 id="create-the-master-layout">Create the master layout</h1>
+<p>Ensure that the file located in <code class="highlighter-rouge">resources/views/layouts/master.blade.php</code> contains the following contents:</p>
+
+<figure class="highlight"><pre><code class="language-php" data-lang="php"><span class="c">&lt;!-- resources/views/layouts/master.blade.php --&gt;</span>
+<span class="cp">&lt;!doctype html&gt;</span>
+<span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">"en"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">"UTF-8"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"viewport"</span>
+          <span class="na">content=</span><span class="s">"width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">"X-UA-Compatible"</span> <span class="na">content=</span><span class="s">"ie=edge"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"csrf-token"</span> <span class="na">content=</span><span class="s">""</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">"stylesheet"</span> <span class="na">href=</span><span class="s">""</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;title&gt;</span>Laravel Chat Application<span class="nt">&lt;/title&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"app"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;App</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">""</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span></code></pre></figure>
+
+<p>This is a basic HTML template with a link to the stylesheet and JavaScript file for the application. Also, a custom HTML tag <code class="highlighter-rouge">&lt;App /&gt;</code> representing the markup to render the AppComponent in the <code class="highlighter-rouge">resources/js/App.vue</code> files. The <code class="highlighter-rouge">AppComponent</code> is the entry point of the Vue.js application. More about this later in the tutorial.</p>
+
+<p>Now that you are done setting up the contents required for the Backend, you can now proceed to create the structure for the frontend of the application.</p>
+
+<h1 id="getting-started-with-the-frontend">Getting started with the frontend</h1>
+<p>Earlier, you started this project by downloading a starter template from GitHub. As mentioned, it contains some dependencies that you need to install for this application before you can proceed. You have already installed the dependencies for the Backend and now open another terminal from your project’s directory and run the following command to install the dependencies for the frontend using NPM:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">// <span class="nb">install </span>dependencies 
+npm <span class="nb">install</span></code></pre></figure>
+
+<p>Here is a list of some of the dependencies that will be installed from your <code class="highlighter-rouge">package.json</code> file:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">vue</code>: Vue.js for building a single page application.</li>
+  <li><code class="highlighter-rouge">axios</code>: A promise-based HTTP client for the browser</li>
+  <li><code class="highlighter-rouge">@cometchat-pro/chat</code>: This is the JavaScript SDK for CometChat</li>
+  <li><code class="highlighter-rouge">vue-router</code>: This is the official router for Vue.js</li>
+</ul>
+
+<p><strong>Create a CometChat account</strong> To be able to use and integrate CometChat into your application, you need to create an account. Head over to <a href="https://www.cometchat.com/">CometChat website</a> and <a href="https://app.cometchat.io/register">create a free CometChat Pro account</a>. Once you fill all the required information, you will have a trial account set up for you immediately. Now, proceed to your <a href="https://app.cometchat.io/apps">CometChat dashboard</a>, then add a new app by choosing the stable version of CometChat SDK (v2) and select your preferred region, as it will be used as it will be required when initializing CometChat within your project, I have selected <code class="highlighter-rouge">Europe</code> for this tutorial. Next, enter a name for your app, then click on the <code class="highlighter-rouge">+</code> sign and wait for a couple of seconds for your new app to be created.</p>
+
+<p><img src="https://paper-attachments.dropbox.com/s_96FD57C7C08D425EDE7D65AA10E29003B8F42BCE9C0BD7735B040319CCB0D742_1575376156013_app-comet.png" alt="" /></p>
+
+<p>Once your application is successfully created, click on <strong>Explore</strong> to open it and then go to the <strong>API Keys</strong> tab, copy both your <strong>APP ID</strong> and <strong>API Key</strong> (with full access scope) and save it somewhere. Also, by default, CometChat will automatically create a group with a unique GUID for your app. Click on <strong>Groups</strong> tab to access it and copy it as well.</p>
+
+<p>Next, back in your Laravel application, open the <code class="highlighter-rouge">.env</code> file and locate these variables:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">MIX_COMMETCHAT_API_KEY</span><span class="o">=</span>YOUR_COMMETCHAT_API_KEY
+<span class="nv">MIX_COMMETCHAT_APP_ID</span><span class="o">=</span>YOUR_COMMETCHAT_APP_ID
+<span class="nv">MIX_COMMETCHAT_GUID</span><span class="o">=</span>YOUR_COMMETCHAT_GUID</code></pre></figure>
+
+<p>Replace the <code class="highlighter-rouge">YOUR_COMMETCHAT_API_KEY, YOUR_COMMETCHAT_APP_ID, YOUR_COMMETCHAT_GUID</code> placeholder with the appropriate credentials as obtained from your CometChat dashboard. With that out of the way, you can now start setting up the group chat.</p>
+
+<h1 id="initialize-cometchat">Initialize CometChat</h1>
+<p>It is recommended by CometChat that your application must call the <code class="highlighter-rouge">init()</code> method from the JavaScript SDK once your app starts. This will enable your app to communicate with the CometChat server easily. To achieve that, navigate to <code class="highlighter-rouge">resources/js/App.vue</code> file and update the script section with the following code:</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">// resources/js/App.vue</span>
+
+<span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+    <span class="k">import</span> <span class="p">{</span> <span class="nx">CometChat</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@cometchat-pro/chat</span><span class="dl">"</span><span class="p">;</span>
+    <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+        <span class="nx">created</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">initializeApp</span><span class="p">();</span>
+        <span class="p">},</span>
+
+        <span class="na">methods</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nx">initializeApp</span><span class="p">()</span> <span class="p">{</span>
+                <span class="kd">let</span> <span class="nx">appID</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">MIX_COMMETCHAT_APP_ID</span><span class="p">;</span>
+
+                <span class="kd">let</span> <span class="nx">cometChatSettings</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">CometChat</span><span class="p">.</span><span class="nx">AppSettingsBuilder</span><span class="p">()</span>
+                    <span class="p">.</span><span class="nx">subscribePresenceForAllUsers</span><span class="p">()</span>
+                    <span class="p">.</span><span class="nx">setRegion</span><span class="p">(</span><span class="dl">"</span><span class="s2">eu</span><span class="dl">"</span><span class="p">)</span>
+                    <span class="p">.</span><span class="nx">build</span><span class="p">();</span>
+
+                <span class="nx">CometChat</span><span class="p">.</span><span class="nx">init</span><span class="p">(</span><span class="nx">appID</span><span class="p">,</span> <span class="nx">cometChatSettings</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span>
+                    <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Initialization completed successfully</span><span class="dl">"</span><span class="p">);</span>
+                    <span class="p">},</span>
+                    <span class="nx">error</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Initialization failed with error:</span><span class="dl">"</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+<span class="o">&lt;</span><span class="sr">/script&gt;</span></code></pre></figure>
+
+<p>Here, you initialise CometChat with your unique APP_ID and REGION.</p>
+
+<blockquote>
+  <p>💡 If you chose the US as your region, write setRegion(“us”) instead of setRegion(“eu”) as did above</p>
+</blockquote>
+
+<h1 id="register-and-create-a-new-user">Register and create a new user</h1>
+<p>The approach for this application is to register a user into your application and immediately create the same user programmatically in CometChat. You will achieve all these by using the REST API provided by CometChat once the registration process is successful within your application.</p>
+
+<p>To begin, you will create a new folder named <code class="highlighter-rouge">views</code> within <code class="highlighter-rouge">resources/js</code> folder. And within the newly created folder, create a new file and call it <code class="highlighter-rouge">Register.vue</code>. Open it and update its <code class="highlighter-rouge">&lt;template&gt;&lt;/template&gt;</code> section with the following content:</p>
+
+<figure class="highlight"><pre><code class="language-vue" data-lang="vue">// resources/js/views/Register.vue
+<span class="nt">&lt;</span><span class="k">template</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"login-page"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"login"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"register-container auth-container"</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"register-image-column"</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"image-holder"</span><span class="nt">&gt;</span>
+                        <span class="nt">&lt;img</span> <span class="na">src=</span><span class="s">"../../assets/login-illustration.svg"</span> <span class="na">alt=</span><span class="s">""</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;/div&gt;</span>
+                <span class="nt">&lt;/div&gt;</span>
+
+                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"register-form-column"</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;form</span> <span class="na">v-on:submit.prevent=</span><span class="s">"registerAppUser"</span><span class="nt">&gt;</span>
+                        <span class="nt">&lt;h3&gt;</span>Create an Account<span class="nt">&lt;/h3&gt;</span>
+                        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-wrapper"</span><span class="nt">&gt;</span>
+                            <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">"username"</span><span class="nt">&gt;</span>Username<span class="nt">&lt;/label&gt;</span>
+                            <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"username"</span> <span class="na">id=</span><span class="s">"username"</span> <span class="na">v-model=</span><span class="s">"username"</span> <span class="na">placeholder=</span><span class="s">"Enter your username"</span> <span class="na">class=</span><span class="s">"form-control"</span> <span class="na">required</span><span class="nt">&gt;</span>
+                        <span class="nt">&lt;/div&gt;</span>
+
+                        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-wrapper"</span><span class="nt">&gt;</span>
+                            <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">"password"</span><span class="nt">&gt;</span>Password<span class="nt">&lt;/label&gt;</span>
+                            <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"password"</span> <span class="na">name=</span><span class="s">"password"</span> <span class="na">id=</span><span class="s">"password"</span> <span class="na">v-model=</span><span class="s">"password"</span> <span class="na">placeholder=</span><span class="s">"Enter your password"</span> <span class="na">class=</span><span class="s">"form-control"</span> <span class="na">required</span><span class="nt">&gt;</span>
+                        <span class="nt">&lt;/div&gt;</span>
+
+                        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-wrapper"</span><span class="nt">&gt;</span>
+                            <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">"password_confirmation"</span><span class="nt">&gt;</span>Confirm Password<span class="nt">&lt;/label&gt;</span>
+                            <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"password"</span> <span class="na">name=</span><span class="s">"password_confirmation"</span> <span class="na">id=</span><span class="s">"password_confirmation"</span> <span class="na">v-model=</span><span class="s">"password_confirmation"</span> <span class="na">placeholder=</span><span class="s">"Re-enter password"</span> <span class="na">class=</span><span class="s">"form-control"</span> <span class="na">required</span><span class="nt">&gt;</span>
+                        <span class="nt">&lt;/div&gt;</span>
+                        <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"submit"</span><span class="nt">&gt;</span>SIGN UP <span class="ni">&amp;nbsp;&amp;nbsp;</span><span class="nt">&lt;span</span> <span class="na">v-if=</span><span class="s">"showSpinner"</span> <span class="na">class=</span><span class="s">"fa fa-spin fa-spinner"</span><span class="nt">&gt;&lt;/span&gt;</span> <span class="nt">&lt;/button&gt;</span>
+                    <span class="nt">&lt;/form&gt;</span>
+
+                    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"text-center m-t-50 link-reg"</span><span class="nt">&gt;</span>
+                        <span class="nt">&lt;p</span> <span class="na">v-on:click=</span><span class="s">"redirectToLogin"</span><span class="nt">&gt;</span>Do you have an account?  <span class="nt">&lt;span&gt;</span>Log in<span class="nt">&lt;/span&gt;&lt;/p&gt;</span>
+                    <span class="nt">&lt;/div&gt;</span>
+                <span class="nt">&lt;/div&gt;</span>
+            <span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/</span><span class="k">template</span><span class="nt">&gt;</span></code></pre></figure>
+
+<p>The code snippet above contains input fields that will be used to obtain the <code class="highlighter-rouge">username</code>, <code class="highlighter-rouge">password</code>, and <code class="highlighter-rouge">password_confirmation</code> of a user during the registration process. The HTML form will call a method named <code class="highlighter-rouge">registerAppUser()</code> once submitted.</p>
+
+<p>Now, within the <code class="highlighter-rouge">&lt;script&gt;&lt;/script&gt;</code> section of the Register Component, paste the following code:</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">// resources/js/views/Register.vue</span>
+
+<span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+    <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+        <span class="nx">data</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="na">username</span><span class="p">:</span> <span class="dl">""</span><span class="p">,</span>
+                <span class="na">password</span><span class="p">:</span> <span class="dl">''</span><span class="p">,</span>
+                <span class="na">password_confirmation</span><span class="p">:</span> <span class="dl">''</span><span class="p">,</span>
+                <span class="na">showSpinner</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+            <span class="p">};</span>
+        <span class="p">},</span>
+        <span class="na">methods</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nx">registerAppUser</span><span class="p">()</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">username</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">password</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">password_confirmation</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">password</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">password_confirmation</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="kd">let</span> <span class="nx">userData</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="na">username</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">username</span><span class="p">,</span>
+                            <span class="na">password</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">password</span><span class="p">,</span>
+                            <span class="na">password_confirmation</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">password_confirmation</span>
+                        <span class="p">};</span>
+
+                        <span class="nx">axios</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s2">`http://localhost:8000/api/register`</span><span class="p">,</span> <span class="nx">userData</span><span class="p">)</span>
+                            <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">response</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                                <span class="k">if</span> <span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+                                    <span class="k">this</span><span class="p">.</span><span class="nx">createUserOnCometChat</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">username</span><span class="p">);</span>
+                                <span class="p">}</span>
+                            <span class="p">}).</span><span class="k">catch</span><span class="p">(</span><span class="nx">error</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                            <span class="nx">alert</span><span class="p">(</span><span class="nx">error</span><span class="p">.</span><span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+                        <span class="p">})</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="nx">redirectToLogin</span><span class="p">()</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">$router</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span><span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">login</span><span class="dl">'</span><span class="p">})</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+<span class="o">&lt;</span><span class="sr">/script&gt;</span></code></pre></figure>
+
+<p>Above, you defined the properties and corresponding initial values within the data option and then created the <code class="highlighter-rouge">registerAppUser()</code> method. This method obtained the <code class="highlighter-rouge">username</code> and <code class="highlighter-rouge">password</code> of a user and used <code class="highlighter-rouge">axios</code> to send it to the backend (Laravel). Once the user’s details are saved successfully, the backend API will return a successful response.</p>
+
+<p>If the registration process was successful, a new method to programmatically create the user on CometChat would be called.</p>
+
+<p><strong>Create a user on CometChat</strong></p>
+
+<p>Add the following method to create the user on CometChat:</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">// resources/js/views/Register.vue</span>
+
+<span class="k">async</span> <span class="nx">createUserOnCometChat</span><span class="p">(</span><span class="nx">username</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">url</span> <span class="o">=</span> <span class="s2">`https://api-eu.cometchat.io/v2.0/users`</span><span class="p">;</span>
+    <span class="kd">let</span> <span class="nx">data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="na">uid</span><span class="p">:</span> <span class="nx">username</span><span class="p">,</span>
+        <span class="na">name</span><span class="p">:</span> <span class="s2">`</span><span class="p">${</span><span class="nx">username</span><span class="p">}</span><span class="s2"> sample`</span><span class="p">,</span>
+        <span class="na">avatar</span><span class="p">:</span> <span class="dl">'</span><span class="s1">https://data-eu.cometchat.io/assets/images/avatars/captainamerica.png</span><span class="dl">'</span><span class="p">,</span>
+    <span class="p">};</span>
+
+    <span class="k">try</span> <span class="p">{</span>
+        <span class="kd">const</span> <span class="nx">userResponse</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">fetch</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="p">{</span>
+            <span class="na">method</span><span class="p">:</span> <span class="dl">'</span><span class="s1">POST</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">headers</span><span class="p">:</span> <span class="k">new</span> <span class="nx">Headers</span><span class="p">({</span>
+                <span class="na">appid</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">MIX_COMMETCHAT_APP_ID</span><span class="p">,</span>
+                <span class="na">apikey</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">MIX_COMMETCHAT_API_KEY</span><span class="p">,</span>
+                <span class="dl">'</span><span class="s1">Content-Type</span><span class="dl">'</span><span class="p">:</span> <span class="dl">'</span><span class="s1">application/json</span><span class="dl">'</span>
+            <span class="p">}),</span>
+            <span class="na">body</span><span class="p">:</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">data</span><span class="p">),</span>
+        <span class="p">});</span>
+        <span class="kd">const</span> <span class="nx">userJson</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">userResponse</span><span class="p">.</span><span class="nx">json</span><span class="p">();</span>
+
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">New User</span><span class="dl">'</span><span class="p">,</span> <span class="nx">userJson</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">createAuthTokenAndSaveForUser</span><span class="p">(</span><span class="nx">username</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">redirectToLogin</span><span class="p">();</span>
+    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Error</span><span class="dl">'</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>This method takes the username of the registered user after a successful sign-up process and passes it along with a custom name to CometChat Create User API. After the user has been created successfully, another method to create an auth via the CometChat API for the new user was also invoked.</p>
+
+<p><strong>Creating a new CometChat auth token</strong> Add the method below to create an auth token for the user and the token in your database once the process is completed:</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">// resources/js/views/Register.vue</span>
+
+<span class="k">async</span> <span class="nx">createAuthTokenAndSaveForUser</span><span class="p">(</span><span class="nx">uid</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">url</span> <span class="o">=</span> <span class="s2">`https://api-eu.cometchat.io/v2.0/users/</span><span class="p">${</span><span class="nx">uid</span><span class="p">}</span><span class="s2">/auth_tokens`</span><span class="p">;</span>
+
+    <span class="k">try</span> <span class="p">{</span>
+        <span class="kd">const</span> <span class="nx">tokenResponse</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">fetch</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="p">{</span>
+            <span class="na">method</span><span class="p">:</span> <span class="dl">'</span><span class="s1">POST</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">headers</span><span class="p">:</span> <span class="k">new</span> <span class="nx">Headers</span><span class="p">({</span>
+                <span class="na">appid</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">MIX_COMMETCHAT_APP_ID</span><span class="p">,</span>
+                <span class="na">apikey</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">MIX_COMMETCHAT_API_KEY</span><span class="p">,</span>
+                <span class="dl">'</span><span class="s1">Content-Type</span><span class="dl">'</span><span class="p">:</span> <span class="dl">'</span><span class="s1">application/json</span><span class="dl">'</span>
+            <span class="p">}),</span>
+        <span class="p">});</span>
+        <span class="kd">const</span> <span class="nx">tokenJSON</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">tokenResponse</span><span class="p">.</span><span class="nx">json</span><span class="p">();</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">addUserToAGroup</span><span class="p">(</span><span class="nx">uid</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">sendTokenToServer</span><span class="p">(</span><span class="nx">tokenJSON</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">authToken</span><span class="p">,</span> <span class="nx">tokenJSON</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">uid</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Error Token</span><span class="dl">'</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+    <span class="p">}</span>
+
+<span class="p">}</span></code></pre></figure>
+
+<p><strong>Add user to a group</strong> CometChat has already created members for the default group for your application automatically. So, before users that are created through your Laravel application can participate in a chat session, they need to be added as a member. Use the following method to add users of your application to a group:</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">// resources/js/views/Register.vue</span>
+
+<span class="k">async</span> <span class="nx">addUserToAGroup</span><span class="p">(</span><span class="nx">uid</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">url</span> <span class="o">=</span> <span class="s2">`https://api-eu.cometchat.io/v2.0/groups/</span><span class="p">${</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">MIX_COMMETCHAT_GUID</span><span class="p">}</span><span class="s2">/members`</span><span class="p">;</span>
+    <span class="kd">let</span> <span class="nx">data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="dl">"</span><span class="s2">participants</span><span class="dl">"</span><span class="p">:[</span><span class="nx">uid</span><span class="p">]</span>
+    <span class="p">};</span>
+
+    <span class="k">try</span> <span class="p">{</span>
+        <span class="kd">const</span> <span class="nx">groupResponse</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">fetch</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="p">{</span>
+            <span class="na">method</span><span class="p">:</span> <span class="dl">'</span><span class="s1">POST</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">headers</span><span class="p">:</span> <span class="k">new</span> <span class="nx">Headers</span><span class="p">({</span>
+                <span class="na">appid</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">MIX_COMMETCHAT_APP_ID</span><span class="p">,</span>
+                <span class="na">apikey</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">MIX_COMMETCHAT_API_KEY</span><span class="p">,</span>
+                <span class="dl">'</span><span class="s1">Content-Type</span><span class="dl">'</span><span class="p">:</span> <span class="dl">'</span><span class="s1">application/json</span><span class="dl">'</span>
+            <span class="p">}),</span>
+            <span class="na">body</span><span class="p">:</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">data</span><span class="p">),</span>
+        <span class="p">});</span>
+        <span class="kd">const</span> <span class="nx">groupJson</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">groupResponse</span><span class="p">.</span><span class="nx">json</span><span class="p">();</span>
+
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Added to group</span><span class="dl">'</span><span class="p">,</span> <span class="nx">groupJson</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Error</span><span class="dl">'</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">},</span></code></pre></figure>
+
+<p><strong>Save AuthToken in database</strong> Having generated an <code class="highlighter-rouge">AuthToken</code> for your app users on CometChat, you need to save the token in the database for that particular user. With this in place, the token can be retrieved as part of the user’s details when authenticating the user within your application. Add the method below for that purpose:</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">// resources/js/views/Register.vue</span>
+
+<span class="nx">sendTokenToServer</span><span class="p">(</span><span class="nx">token</span><span class="p">,</span> <span class="nx">uid</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">axios</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s2">`http://localhost:8000/api/update/token`</span><span class="p">,</span> <span class="p">{</span><span class="nx">token</span><span class="p">,</span> <span class="nx">uid</span><span class="p">})</span>
+        <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">response</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Token updated successfully</span><span class="dl">"</span><span class="p">,</span> <span class="nx">response</span><span class="p">);</span>
+        <span class="p">}).</span><span class="k">catch</span><span class="p">(</span><span class="nx">error</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">alert</span><span class="p">(</span><span class="nx">error</span><span class="p">.</span><span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+    <span class="p">})</span>
+<span class="p">}</span></code></pre></figure>
+
+<h1 id="authenticating-users">Authenticating users</h1>
+<p>Since you can now register users, create such users on CometChat and add them as a member of a particular group through your application, you will now proceed to authenticate users within your application and also on CometChat.</p>
+
+<p>To begin, create a new file within <code class="highlighter-rouge">resources/js/views</code> folder and name it <code class="highlighter-rouge">Login.vue</code>. Open the newly created file and update the <code class="highlighter-rouge">&lt;template&gt;&lt;/template&gt;</code> section with the following code:</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">// resources/js/views/Login.vue</span>
+
+<span class="o">&lt;</span><span class="nx">template</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">login-page</span><span class="dl">"</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">login</span><span class="dl">"</span><span class="o">&gt;</span>
+            <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">login-container auth-container</span><span class="dl">"</span><span class="o">&gt;</span>
+                <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">login-form-column</span><span class="dl">"</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="nx">form</span> <span class="nx">v</span><span class="o">-</span><span class="nx">on</span><span class="p">:</span><span class="nx">submit</span><span class="p">.</span><span class="nx">prevent</span><span class="o">=</span><span class="dl">"</span><span class="s2">authLoginAppUser</span><span class="dl">"</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">h3</span><span class="o">&gt;</span><span class="nx">Hello</span><span class="o">!&lt;</span><span class="sr">/h3</span><span class="err">&gt;
+</span>                        <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">form-wrapper</span><span class="dl">"</span><span class="o">&gt;</span>
+                            <span class="o">&lt;</span><span class="nx">label</span><span class="o">&gt;</span><span class="nx">Username</span><span class="o">&lt;</span><span class="sr">/label</span><span class="err">&gt;
+</span>                            <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="dl">"</span><span class="s2">text</span><span class="dl">"</span> <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">username</span><span class="dl">"</span> <span class="nx">id</span><span class="o">=</span><span class="dl">"</span><span class="s2">username</span><span class="dl">"</span> <span class="nx">v</span><span class="o">-</span><span class="nx">model</span><span class="o">=</span><span class="dl">"</span><span class="s2">username</span><span class="dl">"</span> <span class="nx">placeholder</span><span class="o">=</span><span class="dl">"</span><span class="s2">Enter your username</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">form-control</span><span class="dl">"</span> <span class="nx">required</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>
+                        <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">form-wrapper</span><span class="dl">"</span><span class="o">&gt;</span>
+                            <span class="o">&lt;</span><span class="nx">label</span> <span class="k">for</span><span class="o">=</span><span class="dl">"</span><span class="s2">password</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Password</span><span class="o">&lt;</span><span class="sr">/label</span><span class="err">&gt;
+</span>                            <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="dl">"</span><span class="s2">password</span><span class="dl">"</span> <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">password</span><span class="dl">"</span> <span class="nx">id</span><span class="o">=</span><span class="dl">"</span><span class="s2">password</span><span class="dl">"</span> <span class="nx">v</span><span class="o">-</span><span class="nx">model</span><span class="o">=</span><span class="dl">"</span><span class="s2">password</span><span class="dl">"</span> <span class="nx">placeholder</span><span class="o">=</span><span class="dl">"</span><span class="s2">******</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">form-control</span><span class="dl">"</span> <span class="nx">required</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>                        <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">type</span><span class="o">=</span><span class="dl">"</span><span class="s2">submit</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">LOG</span> <span class="nx">IN</span> <span class="o">&amp;</span><span class="nx">nbsp</span><span class="p">;</span><span class="o">&amp;</span><span class="nx">nbsp</span><span class="p">;</span><span class="o">&lt;</span><span class="nx">span</span> <span class="nx">v</span><span class="o">-</span><span class="k">if</span><span class="o">=</span><span class="dl">"</span><span class="s2">showSpinner</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">fa fa-spin fa-spinner</span><span class="dl">"</span><span class="o">&gt;&lt;</span><span class="sr">/span&gt; &lt;/</span><span class="nx">button</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="sr">/form</span><span class="err">&gt;
+</span>
+                    <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-center m-t-50 link-reg</span><span class="dl">"</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">p</span> <span class="nx">v</span><span class="o">-</span><span class="nx">on</span><span class="p">:</span><span class="nx">click</span><span class="o">=</span><span class="dl">"</span><span class="s2">redirectToRegister</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Don</span><span class="dl">'</span><span class="s1">t have an account? &lt;span&gt;Register&lt;/span&gt;&lt;/p&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+                &lt;div class="login-image-column"&gt;
+                    &lt;div class="image-holder"&gt;
+                        &lt;img src="../../assets/login-illustration.svg" alt=""&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/template&gt;</span></code></pre></figure>
+
+<p>Here, the HTML form will receive the inputted value for the <code class="highlighter-rouge">username</code> and <code class="highlighter-rouge">password</code> of a user and send it to be processed by the <code class="highlighter-rouge">authLoginAppUser()</code> method once the form is submitted. Next, use the content below to update the <code class="highlighter-rouge">&lt;script&gt;&lt;/script&gt;</code> section of the Login component:</p>
+
+<figure class="highlight"><pre><code class="language-vue" data-lang="vue">// resources/js/views/Login.vue
+<span class="nt">&lt;</span><span class="k">script</span><span class="nt">&gt;</span>
+    <span class="k">import</span> <span class="p">{</span> <span class="nx">CometChat</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@cometchat-pro/chat</span><span class="dl">"</span><span class="p">;</span>
+    <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+        <span class="nx">data</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="na">username</span><span class="p">:</span> <span class="dl">""</span><span class="p">,</span>
+                <span class="na">password</span><span class="p">:</span> <span class="dl">''</span><span class="p">,</span>
+                <span class="na">showSpinner</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                <span class="na">token</span><span class="p">:</span> <span class="dl">''</span><span class="p">,</span>
+            <span class="p">};</span>
+        <span class="p">},</span>
+        <span class="na">methods</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nx">authLoginAppUser</span><span class="p">()</span> <span class="p">{</span>
+                <span class="kd">let</span> <span class="nx">userData</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="na">username</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">username</span><span class="p">,</span>
+                    <span class="na">password</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">password</span>
+                <span class="p">};</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">username</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">password</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">axios</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s2">`http://localhost:8000/api/login`</span><span class="p">,</span> <span class="nx">userData</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="nx">response</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                        <span class="k">this</span><span class="p">.</span><span class="nx">logUserInToCometChat</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">token</span><span class="p">)</span>
+                    <span class="p">}).</span><span class="k">catch</span><span class="p">(</span><span class="nx">error</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                        <span class="nx">alert</span><span class="p">(</span><span class="nx">error</span><span class="p">.</span><span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+                        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">error</span><span class="p">.</span><span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+                    <span class="p">})</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="nx">alert</span><span class="p">(</span><span class="dl">'</span><span class="s1">Please check your credentials</span><span class="dl">'</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="nx">redirectToRegister</span><span class="p">()</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">$router</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span><span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">register</span><span class="dl">'</span><span class="p">});</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+<span class="nt">&lt;/</span><span class="k">script</span><span class="nt">&gt;</span></code></pre></figure>
+
+<p>The <code class="highlighter-rouge">authLoginAppUser()</code> method will receive the <code class="highlighter-rouge">username</code> and <code class="highlighter-rouge">password</code> of a user and use axios to post it to the backend API for authentication. If the credential inputted by the user is correct, the <code class="highlighter-rouge">authToken</code> generated for such user during the registration process will be retrieved and returned as part of the JSON response for further usage.</p>
+
+<p>The returned <code class="highlighter-rouge">authToken</code> will now be used to log the user in on CometChat. Add the following method, immediately after the <code class="highlighter-rouge">authLoginAppUser</code> for that purpose:</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">logUserInToCometChat</span><span class="p">(</span><span class="nx">token</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">showSpinner</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="nx">CometChat</span><span class="p">.</span><span class="nx">login</span><span class="p">(</span><span class="nx">token</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span>
+        <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">showSpinner</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">successfully login user</span><span class="dl">"</span><span class="p">);</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">$router</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+                <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">chat</span><span class="dl">'</span><span class="p">,</span>
+                <span class="na">params</span><span class="p">:</span> <span class="p">{</span><span class="na">username</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">username</span><span class="p">,</span> <span class="na">authenticated</span><span class="p">:</span> <span class="kc">true</span><span class="p">}</span>
+            <span class="p">});</span>
+        <span class="p">},</span>
+        <span class="nx">error</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">showSpinner</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="nx">alert</span><span class="p">(</span><span class="dl">"</span><span class="s2">Whops. Something went wrong. This commonly happens when you enter a username that doesn't exist. Check the console for more information</span><span class="dl">"</span><span class="p">);</span>
+          <span class="k">this</span><span class="p">.</span><span class="nx">$router</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+              <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">login</span><span class="dl">'</span><span class="p">,</span>
+              <span class="na">params</span><span class="p">:</span> <span class="p">{</span><span class="na">username</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">username</span><span class="p">,</span> <span class="na">authenticated</span><span class="p">:</span> <span class="kc">true</span><span class="p">}</span>
+          <span class="p">});</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Login failed with error:</span><span class="dl">"</span><span class="p">,</span> <span class="nx">error</span><span class="p">.</span><span class="nx">code</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">);</span>
+<span class="p">},</span></code></pre></figure>
+
+<p>Here, you called the <code class="highlighter-rouge">login()</code> method from CometChat SDK and passed the <code class="highlighter-rouge">authToken</code> of the user to it as a parameter. Once the user has been authenticated successfully, you will redirect the user to the Chat page by using Vue Router, which handles navigation for the application. Otherwise, a prompt with the appropriate message of why the process failed will be displayed, and the user will be redirected back to the login page.</p>
+
+<h1 id="the-chat-view">The chat view</h1>
+<p>Create a new file named <code class="highlighter-rouge">Chat.vue</code> within the <code class="highlighter-rouge">resources/js/views</code> and update the <code class="highlighter-rouge">&lt;template&gt;&lt;/template&gt;</code> section with the following content:</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">// resources/js/views/Chat.vue</span>
+
+<span class="o">&lt;</span><span class="nx">template</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">booker</span><span class="dl">"</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">nav</span><span class="o">-</span><span class="nx">bar</span> <span class="p">:</span><span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">this.username</span><span class="dl">"</span> <span class="p">:</span><span class="nx">avatar</span><span class="o">=</span><span class="dl">"</span><span class="s2">this.avatar</span><span class="dl">"</span> <span class="o">/&gt;</span>
+        <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">chat</span><span class="dl">"</span><span class="o">&gt;</span>
+            <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">container</span><span class="dl">"</span><span class="o">&gt;</span>
+                <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">msg-header</span><span class="dl">"</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">active</span><span class="dl">"</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">h5</span><span class="o">&gt;</span><span class="err">#</span><span class="nx">General</span><span class="o">&lt;</span><span class="sr">/h5</span><span class="err">&gt;
+</span>                    <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>
+                <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">chat-page</span><span class="dl">"</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">msg-inbox</span><span class="dl">"</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">chats</span><span class="dl">"</span> <span class="nx">id</span><span class="o">=</span><span class="dl">"</span><span class="s2">chats</span><span class="dl">"</span><span class="o">&gt;</span>
+                            <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">msg-page</span><span class="dl">"</span> <span class="nx">id</span><span class="o">=</span><span class="dl">"</span><span class="s2">msg-page</span><span class="dl">"</span><span class="o">&gt;</span>
+
+                                <span class="o">&lt;</span><span class="nx">div</span>
+                                    <span class="nx">v</span><span class="o">-</span><span class="k">if</span><span class="o">=</span><span class="dl">"</span><span class="s2">loadingMessages</span><span class="dl">"</span>
+                                    <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">loading-messages-container</span><span class="dl">"</span>
+                                <span class="o">&gt;</span>
+                                    <span class="o">&lt;</span><span class="nx">spinner</span> <span class="p">:</span><span class="nx">size</span><span class="o">=</span><span class="dl">"</span><span class="s2">100</span><span class="dl">"</span><span class="o">/&gt;</span>
+                                    <span class="o">&lt;</span><span class="nx">span</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">loading-text</span><span class="dl">"</span><span class="o">&gt;</span>
+                            <span class="nx">Loading</span> <span class="nx">Messages</span>
+                          <span class="o">&lt;</span><span class="sr">/span</span><span class="err">&gt;
+</span>                                <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>                                <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-center img-fluid empty-chat</span><span class="dl">"</span> <span class="nx">v</span><span class="o">-</span><span class="k">else</span><span class="o">-</span><span class="k">if</span><span class="o">=</span><span class="dl">"</span><span class="s2">!groupMessages.length</span><span class="dl">"</span> <span class="o">&gt;</span>
+                                    <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">empty-chat-holder</span><span class="dl">"</span><span class="o">&gt;</span>
+                                        <span class="o">&lt;</span><span class="nx">img</span> <span class="nx">src</span><span class="o">=</span><span class="dl">"</span><span class="s2">../../assets/empty-state.svg</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">img-res</span><span class="dl">"</span> <span class="nx">alt</span><span class="o">=</span><span class="dl">"</span><span class="s2">empty chat image</span><span class="dl">"</span><span class="o">&gt;</span>
+                                    <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>
+                                    <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+                                        <span class="o">&lt;</span><span class="nx">h2</span><span class="o">&gt;</span> <span class="nx">No</span> <span class="k">new</span> <span class="nx">message</span><span class="p">?</span> <span class="o">&lt;</span><span class="sr">/h2</span><span class="err">&gt;
+</span>                                        <span class="o">&lt;</span><span class="nx">h6</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">empty-chat-sub-title</span><span class="dl">"</span><span class="o">&gt;</span>
+                                            <span class="nx">Send</span> <span class="nx">your</span> <span class="nx">first</span> <span class="nx">message</span> <span class="nx">below</span><span class="p">.</span>
+                                        <span class="o">&lt;</span><span class="sr">/h6</span><span class="err">&gt;
+</span>                                    <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>                                <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>
+                                <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">v</span><span class="o">-</span><span class="k">else</span><span class="o">&gt;</span>
+                                    <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">v</span><span class="o">-</span><span class="k">for</span><span class="o">=</span><span class="dl">"</span><span class="s2">message in groupMessages</span><span class="dl">"</span> <span class="nx">v</span><span class="o">-</span><span class="nx">bind</span><span class="p">:</span><span class="nx">key</span><span class="o">=</span><span class="dl">"</span><span class="s2">message.id</span><span class="dl">"</span><span class="o">&gt;</span>
+                                        <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">received-chats</span><span class="dl">"</span> <span class="nx">v</span><span class="o">-</span><span class="k">if</span><span class="o">=</span><span class="dl">"</span><span class="s2">message.sender.uid !== uid</span><span class="dl">"</span><span class="o">&gt;</span>
+                                            <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">received-chats-img</span><span class="dl">"</span><span class="o">&gt;</span>
+                                                <span class="o">&lt;</span><span class="nx">img</span> <span class="nx">v</span><span class="o">-</span><span class="nx">bind</span><span class="p">:</span><span class="nx">src</span><span class="o">=</span><span class="dl">"</span><span class="s2">message.sender.avatar</span><span class="dl">"</span> <span class="nx">alt</span><span class="o">=</span><span class="dl">""</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">avatar</span><span class="dl">"</span><span class="o">&gt;</span>
+                                            <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>
+                                            <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">received-msg</span><span class="dl">"</span><span class="o">&gt;</span>
+                                                <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">received-msg-inbox</span><span class="dl">"</span><span class="o">&gt;</span>
+                                                    <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;&lt;</span><span class="nx">span</span><span class="o">&gt;&lt;</span><span class="sr">/span&gt;&lt;br&gt;&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+                                                <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>                                            <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>                                        <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>
+
+                                        <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">outgoing-chats</span><span class="dl">"</span> <span class="nx">v</span><span class="o">-</span><span class="k">else</span><span class="o">&gt;</span>
+                                            <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">outgoing-chats-msg</span><span class="dl">"</span><span class="o">&gt;</span>
+                                                <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;&lt;</span><span class="sr">/p</span><span class="err">&gt;
+</span>                                            <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>
+                                            <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">outgoing-chats-img</span><span class="dl">"</span><span class="o">&gt;</span>
+                                                <span class="o">&lt;</span><span class="nx">img</span> <span class="nx">v</span><span class="o">-</span><span class="nx">bind</span><span class="p">:</span><span class="nx">src</span><span class="o">=</span><span class="dl">"</span><span class="s2">message.sender.avatar</span><span class="dl">"</span> <span class="nx">alt</span><span class="o">=</span><span class="dl">""</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">avatar</span><span class="dl">"</span><span class="o">&gt;</span>
+                                            <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>                                        <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>                                    <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>                                <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>                            <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>                        <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>                    <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>
+                    <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">msg-bottom</span><span class="dl">"</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">form</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">message-form</span><span class="dl">"</span> <span class="nx">v</span><span class="o">-</span><span class="nx">on</span><span class="p">:</span><span class="nx">submit</span><span class="p">.</span><span class="nx">prevent</span><span class="o">=</span><span class="dl">"</span><span class="s2">sendGroupMessage</span><span class="dl">"</span><span class="o">&gt;</span>
+                            <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">input-group</span><span class="dl">"</span><span class="o">&gt;</span>
+                                <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="dl">"</span><span class="s2">text</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">form-control message-input</span><span class="dl">"</span> <span class="nx">placeholder</span><span class="o">=</span><span class="dl">"</span><span class="s2">Type something</span><span class="dl">"</span> <span class="nx">v</span><span class="o">-</span><span class="nx">model</span><span class="o">=</span><span class="dl">"</span><span class="s2">chatMessage</span><span class="dl">"</span> <span class="nx">required</span><span class="o">&gt;</span>
+                                <span class="o">&lt;</span><span class="nx">spinner</span>
+                                    <span class="nx">v</span><span class="o">-</span><span class="k">if</span><span class="o">=</span><span class="dl">"</span><span class="s2">sendingMessage</span><span class="dl">"</span>
+                                    <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">sending-message-spinner</span><span class="dl">"</span>
+                                    <span class="p">:</span><span class="nx">size</span><span class="o">=</span><span class="dl">"</span><span class="s2">30</span><span class="dl">"</span>
+                                <span class="o">/&gt;</span>
+                            <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>                        <span class="o">&lt;</span><span class="sr">/form</span><span class="err">&gt;
+</span>                    <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="sr">/template&gt;</span></code></pre></figure>
+
+<p>The chat view will house all the logic required to interact with the CometChat API to implement the chat functionality, which is the core feature of your application. Here, we will get the details of the logged-in user, implement a method to send and receive messages from a group chat, and also fetch all previous messages sent by a user.</p>
+
+<p>Here, once a user is authenticated and redirected to the chat page, you will receive the user details and display the unique username, avatar, and also an empty chat page for users who just joined a new group with no previous messages.</p>
+
+<p>Also included is a form with an input field that will be used by a user to send a message to a group. The form will be processed by a method that will be implemented later in this section named <code class="highlighter-rouge">sendGroupMessage()</code>.</p>
+
+<p>Get the logged in user details You will retrieve the details of the currently logged in user by calling a method named <code class="highlighter-rouge">getLoggedInUser()</code>. This will return a <a href="https://prodocs.cometchat.com/docs/js-appendix#section-user">User</a> object containing all the information related to the logged-in user. Begin by adding this <code class="highlighter-rouge">&lt;script&gt;</code> section to this component. Place the contents below within the <code class="highlighter-rouge">Chat.vue</code> immediately after the closing tag of the <code class="highlighter-rouge">&lt;template&gt;</code> section:</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">// resources/js/views/Chat.vue</span>
+
+<span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+    <span class="k">import</span> <span class="p">{</span> <span class="nx">CometChat</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@cometchat-pro/chat</span><span class="dl">"</span><span class="p">;</span>
+    <span class="k">import</span> <span class="nx">NavBar</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">../components/NavBar.vue</span><span class="dl">"</span><span class="p">;</span>
+    <span class="k">import</span> <span class="nx">Spinner</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">../components/Spinner.vue</span><span class="dl">"</span><span class="p">;</span>
+
+    <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+        <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">home</span><span class="dl">"</span><span class="p">,</span>
+        <span class="na">components</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nx">NavBar</span><span class="p">,</span>
+            <span class="nx">Spinner</span>
+        <span class="p">},</span>
+        <span class="nx">data</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="na">username</span><span class="p">:</span> <span class="dl">""</span><span class="p">,</span>
+                <span class="na">avatar</span><span class="p">:</span> <span class="dl">""</span><span class="p">,</span>
+                <span class="na">uid</span><span class="p">:</span> <span class="dl">""</span><span class="p">,</span>
+                <span class="na">sendingMessage</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                <span class="na">chatMessage</span><span class="p">:</span> <span class="dl">""</span><span class="p">,</span>
+                <span class="na">loggingOut</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                <span class="na">groupMessages</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="na">loadingMessages</span><span class="p">:</span> <span class="kc">false</span>
+            <span class="p">};</span>
+        <span class="p">},</span>
+        <span class="nx">created</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">getLoggedInUser</span><span class="p">();</span>
+        <span class="p">},</span>
+        <span class="na">methods</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nx">getLoggedInUser</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">CometChat</span><span class="p">.</span><span class="nx">getLoggedinUser</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span>
+                    <span class="nx">user</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                        <span class="k">this</span><span class="p">.</span><span class="nx">username</span> <span class="o">=</span> <span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+                        <span class="k">this</span><span class="p">.</span><span class="nx">avatar</span> <span class="o">=</span> <span class="nx">user</span><span class="p">.</span><span class="nx">avatar</span><span class="p">;</span>
+                        <span class="k">this</span><span class="p">.</span><span class="nx">uid</span> <span class="o">=</span> <span class="nx">user</span><span class="p">.</span><span class="nx">uid</span><span class="p">;</span>
+                    <span class="p">},</span>
+                    <span class="nx">error</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                        <span class="k">this</span><span class="p">.</span><span class="nx">$router</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+                            <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">homepage</span><span class="dl">"</span>
+                        <span class="p">});</span>
+                        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">error</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">);</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+<span class="o">&lt;</span><span class="sr">/script&gt;</span></code></pre></figure>
+
+<p>Once the details of the currently authenticated user are retrieved, the name, the avatar (if any), and unique user Id will also be updated. Otherwise, the user will be redirected to the login page</p>
+
+<p><strong>Send new messages</strong> Add the method below to implement the logic to send a new message to CometChat server during a group chat session:</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">sendGroupMessage</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">sendingMessage</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">receiverID</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">MIX_COMMETCHAT_GUID</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">messageText</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">chatMessage</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">receiverType</span> <span class="o">=</span> <span class="nx">CometChat</span><span class="p">.</span><span class="nx">RECEIVER_TYPE</span><span class="p">.</span><span class="nx">GROUP</span><span class="p">;</span>
+
+    <span class="kd">var</span> <span class="nx">textMessage</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">CometChat</span><span class="p">.</span><span class="nx">TextMessage</span><span class="p">(</span>
+        <span class="nx">receiverID</span><span class="p">,</span>
+        <span class="nx">messageText</span><span class="p">,</span>
+        <span class="nx">receiverType</span>
+    <span class="p">);</span>
+
+    <span class="nx">CometChat</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="nx">textMessage</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span>
+        <span class="nx">message</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Message sent successfully:</span><span class="dl">"</span><span class="p">,</span> <span class="nx">message</span><span class="p">);</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">chatMessage</span> <span class="o">=</span> <span class="dl">""</span><span class="p">;</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">sendingMessage</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">$nextTick</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">scrollToBottom</span><span class="p">()</span>
+            <span class="p">})</span>
+        <span class="p">},</span>
+        <span class="nx">error</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Message sending failed with error:</span><span class="dl">"</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">);</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>Here, you called the <code class="highlighter-rouge">sendMessage()</code> method and passed a constructed <code class="highlighter-rouge">TextMessage()</code> to it. The <code class="highlighter-rouge">TextMessage</code> class constructor takes the <code class="highlighter-rouge">GUID</code>, messageText and receiverType as parameters. <strong>Receive incoming messages and Fetch</strong> previous messages Lastly, add the following method to receive real-time incoming messages posted to a group by its participants:</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="nx">mounted</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">loadingMessages</span> <span class="o">=</span> <span class="kc">true</span>
+        <span class="kd">var</span> <span class="nx">listenerID</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">UNIQUE_LISTENER_ID</span><span class="dl">"</span><span class="p">;</span>
+
+        <span class="kd">const</span> <span class="nx">messagesRequest</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">CometChat</span><span class="p">.</span><span class="nx">MessagesRequestBuilder</span><span class="p">()</span>
+            <span class="p">.</span><span class="nx">setLimit</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+            <span class="p">.</span><span class="nx">build</span><span class="p">()</span>
+        <span class="nx">messagesRequest</span><span class="p">.</span><span class="nx">fetchPrevious</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span>
+            <span class="nx">messages</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Message list fetched:</span><span class="dl">"</span><span class="p">,</span> <span class="nx">messages</span><span class="p">);</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">this.groupMessages</span><span class="dl">"</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">groupMessages</span><span class="p">)</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">groupMessages</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">...</span><span class="k">this</span><span class="p">.</span><span class="nx">groupMessages</span><span class="p">,</span>
+                    <span class="p">...</span><span class="nx">messages</span>
+                <span class="p">];</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">loadingMessages</span> <span class="o">=</span> <span class="kc">false</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">$nextTick</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                    <span class="k">this</span><span class="p">.</span><span class="nx">scrollToBottom</span><span class="p">();</span>
+                <span class="p">})</span>
+            <span class="p">},</span>
+            <span class="nx">error</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Message fetching failed with error:</span><span class="dl">"</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">);</span>
+
+        <span class="nx">CometChat</span><span class="p">.</span><span class="nx">addMessageListener</span><span class="p">(</span>
+            <span class="nx">listenerID</span><span class="p">,</span>
+            <span class="k">new</span> <span class="nx">CometChat</span><span class="p">.</span><span class="nx">MessageListener</span><span class="p">({</span>
+                <span class="na">onTextMessageReceived</span><span class="p">:</span> <span class="nx">textMessage</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Text message received successfully</span><span class="dl">"</span><span class="p">,</span> <span class="nx">textMessage</span><span class="p">);</span>
+                    <span class="c1">// Handle text message</span>
+                    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">groupMessages</span><span class="p">)</span>
+                    <span class="k">this</span><span class="p">.</span><span class="nx">groupMessages</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="p">...</span><span class="k">this</span><span class="p">.</span><span class="nx">groupMessages</span><span class="p">,</span>
+                        <span class="nx">textMessage</span>
+                    <span class="p">];</span>
+                    <span class="k">this</span><span class="p">.</span><span class="nx">loadingMessages</span> <span class="o">=</span> <span class="kc">false</span>
+                    <span class="k">this</span><span class="p">.</span><span class="nx">$nextTick</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                        <span class="k">this</span><span class="p">.</span><span class="nx">scrollToBottom</span><span class="p">();</span>
+                    <span class="p">})</span>
+                <span class="p">}</span>
+            <span class="p">})</span>
+        <span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">};</span></code></pre></figure>
+
+<p>An event listener that takes a unique listenerID as a parameter was registered to listen for messages when your app is running. Lastly, once a user logs in, the <code class="highlighter-rouge">MessagesRequestBuilder</code> will be used to fetch any previous messages from the group and update the view with it.</p>
+
+<h1 id="update-the-router">Update the router</h1>
+<p>Now, in order to render a component for each given path, you will update the generated router file within the project. Open the router file located in <code class="highlighter-rouge">.resources/js/routes.js</code> and replace its content with the following:</p>
+
+<figure class="highlight"><pre><code class="language-vue" data-lang="vue">// resources/js/routes.js
+
+import Vue from 'vue';
+import VueRouter from "vue-router";
+import Login from './views/Login';
+import Register from "./views/Register";
+import Chat from "./views/Chat";
+
+Vue.use(VueRouter);
+
+export default new VueRouter({
+    mode: 'history',
+    routes: [
+        {
+            path: '/',
+            name: 'homepage',
+            redirect: 'login'
+        },
+        {
+            path: '/login',
+            name: 'login',
+            component: Login
+        },
+        {
+            path: '/register',
+            name: 'register',
+            component: Register
+        },
+        {
+            path: '/chat',
+            name: 'chat',
+            component: Chat,
+        },
+        {
+            path: '*',
+            name: 'Not found',
+            redirect: 'login'
+        }
+    ]
+})</code></pre></figure>
+
+<p>You successfully map each route within your application to the respective component that will handle the logic. This is a basic format of configuring Vue Router for a Vue.js application.</p>
+
+<h1 id="configure-the-entry-point">Configure the entry point</h1>
+<p>Navigate to <code class="highlighter-rouge">resources/js/app.js</code> and confirm that its content is the same as what you have below. If otherwise, feel free to update its content with this:</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">// resources/js/app.js</span>
+
+<span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">./bootstrap</span><span class="dl">'</span><span class="p">);</span>
+
+<span class="nb">window</span><span class="p">.</span><span class="nx">Vue</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">vue</span><span class="dl">'</span><span class="p">);</span>
+<span class="k">import</span> <span class="nx">VueRouter</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">vue-router</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">App</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./App.vue</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">routes</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">./routes</span><span class="dl">"</span><span class="p">;</span>
+
+
+<span class="nx">Vue</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">VueRouter</span><span class="p">);</span>
+
+<span class="kd">const</span> <span class="nx">app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Vue</span><span class="p">({</span>
+    <span class="na">el</span><span class="p">:</span> <span class="dl">'</span><span class="s1">#app</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">router</span><span class="p">:</span> <span class="nx">routes</span><span class="p">,</span>
+    <span class="na">components</span><span class="p">:</span> <span class="p">{</span><span class="nx">App</span><span class="p">}</span>
+<span class="p">});</span></code></pre></figure>
+
+<p>Here, you imported Vue, Vue Router library, and the routes file. You then proceeded to create a Vue instance and pass both the router and application components to it.</p>
+
+<h1 id="test-the-application">Test the application</h1>
+<p>If you have followed the tutorial up until now, well done! You have successfully built a group chat application with authentication using Laravel and Vue.js. To test all the implementation and be certain that it works as designed, open two different terminals, and ensure that you are within the project’s directory. Run the backend application from one of the terminals using the following command:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">php artisan serve</code></pre></figure>
+
+<p>This will start the application on the default port 8000. Next, to start the frontend application, use npm as shown here:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">npm run watch</code></pre></figure>
+
+<p>The preceding command will compile all the Vue.js project and continue running the app in watch mode for changes to any relevant files. Now, navigate to <a href="http://localhost:8000">http://localhost:8000</a>, to view the application in your browser:</p>
+
+<p><img src="https://paper-attachments.dropbox.com/s_96FD57C7C08D425EDE7D65AA10E29003B8F42BCE9C0BD7735B040319CCB0D742_1575390323033_homepage.png" alt="" /></p>
+
+<p>Register a user Click on the Register link to register a new user.</p>
+
+<p><img src="https://paper-attachments.dropbox.com/s_96FD57C7C08D425EDE7D65AA10E29003B8F42BCE9C0BD7735B040319CCB0D742_1575390716846_ezgif.com-video-to-gif.gif" alt="" /></p>
+
+<p>Once the registration process is successful, the user will both be created within your application and also on CometChat. You can log in into your <a href="https://app.cometchat.io/apps">CometChat dashboard</a> and click on the Users tab to view the newly created users. Login and start a chat session Immediately after registration, you will be redirected to the Login page. Input the appropriate credential and start a chat session:
+<img src="https://paper-attachments.dropbox.com/s_96FD57C7C08D425EDE7D65AA10E29003B8F42BCE9C0BD7735B040319CCB0D742_1575391098289_ezgif.com-video-to-gif+1.gif" alt="" /></p>
+
+<h1 id="conclusion">Conclusion</h1>
+<p>In this tutorial, you built a chat application using Laravel and Vue.js. I hope that this gives you a proper understanding of how seamless it is to combine these tools to build an awesome chat experience. As you must have noticed, this application can actually be improved on, and I will leave that for you to enhance.</p>
+
+<p>You can also clone the completed app from <a href="https://github.com/christiannwamba/lara-chat-app">Github</a> if you want to have a reference.</p>
+:ET

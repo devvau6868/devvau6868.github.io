@@ -47,6 +47,7 @@ plugins:
   - jekyll-sitemap
   - jekyll-compose
   - jekyll-redirect-from
+  - jekyll-toc
 
 paginate: 8
 paginate_path: "/page/:num/"
