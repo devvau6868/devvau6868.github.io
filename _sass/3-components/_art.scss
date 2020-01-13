@@ -26,6 +26,7 @@
   max-height: 500px;
   background-color: $alternate-background;
   overflow: hidden;
+  border-radius: 10px;
   figure {
     position: relative;
     margin: 0;
@@ -60,6 +61,7 @@
     a {
       text-decoration: none;
       border: 1px solid $dark-color;
+      border-radius: 3px;
       padding: 5px 5px;
       margin-left: 5px;
       color: $dark-color;
@@ -80,6 +82,7 @@
       margin-left: 5px;
       color: $dark-color;
       border: 1px solid $dark-color;
+      border-radius: 3px;
       &:hover {
         text-decoration: underline;
       }
