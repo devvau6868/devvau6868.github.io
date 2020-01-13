@@ -1,0 +1,27 @@
+I"¿
+<ul>
+  <li><a href="#project-level-extensions">Project level extensions</a>
+    <ul>
+      <li><a href="#gistpad"><a href="https://marketplace.visualstudio.com/items?itemName=vsls-contrib.gistfs">Gistpad</a></a></li>
+      <li><a href="#todo-tree"><a href="https://marketplace.visualstudio.com/items?itemName=Gruntfuggly.todo-tree">TODO Tree</a></a></li>
+      <li><a href="#gitlens"><a href="https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens">Gitlens</a></a></li>
+      <li><a href="#project-manager"><a href="https://marketplace.visualstudio.com/items?itemName=alefragnani.project-manager">Project Manager</a></a></li>
+    </ul>
+  </li>
+  <li><a href="#code-level-extensions">Code level extensions</a>
+    <ul>
+      <li><a href="#tech-debt-tracker"><a href="https://marketplace.visualstudio.com/items?itemName=Stepsize.tech-debt-tracker">Tech Debt Tracker</a></a></li>
+      <li><a href="#code-complexity"><a href="https://marketplace.visualstudio.com/items?itemName=kisstkondoros.vscode-codemetrics">Code Complexity</a></a></li>
+      <li><a href="#import-cost"><a href="https://marketplace.visualstudio.com/items?itemName=wix.vscode-import-cost">Import Cost</a></a></li>
+    </ul>
+  </li>
+  <li><a href="#ui-level-enhancements">UI level enhancements</a>
+    <ul>
+      <li><a href="#bracket-pair-colorizer-2"><a href="https://marketplace.visualstudio.com/items?itemName=CoenraadS.bracket-pair-colorizer-2">Bracket Pair Colorizer 2</a></a></li>
+      <li><a href="#indented-block-highlighting"><a href="https://marketplace.visualstudio.com/items?itemName=byi8220.indented-block-highlighting">Indented Block Highlighting</a></a></li>
+      <li><a href="#indenticator"><a href="https://marketplace.visualstudio.com/items?itemName=SirTori.indenticator">Indenticator</a></a></li>
+      <li><a href="#image-preview"><a href="https://marketplace.visualstudio.com/items?itemName=kisstkondoros.vscode-gutter-preview">Image Preview</a></a></li>
+    </ul>
+  </li>
+</ul>
+:EF
