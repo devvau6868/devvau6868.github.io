@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Build a chat app with Laravel and Vue
-date: 2019-01-01 00:00:00 +0300
+date: 2020-01-01 00:00:00 +0300
 description: Build a chat app with Laravel and Vue
 img: larave-vue.png # Add image post (optional)
 tags: [Laravel, Vue] # add tag
