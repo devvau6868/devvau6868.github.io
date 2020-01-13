@@ -1,0 +1,86 @@
+I"�<p>In this tutorial we’ll go over why you should make the switch, and how you can retain all of your extensions when you do make the switch. It won’t take more than a couple of minutes to do the actual change!</p>
+
+<h1 id="the-problem-with-visual-studio-code">The problem with Visual Studio Code</h1>
+<p>Visual Studio code is without a doubt <a href="https://2019.stateofjs.com/other-tools/#text_editors">the most used</a> Code editor (for front end developers at least). It definitely provides a lot of helpful extensions of which there have been umpteen posts about.</p>
+
+<p><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--GSHJpZx0--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://2019.stateofjs.com/images/captures/text_editors.png" alt="text editors" /></p>
+
+<h2 id="so-why-would-i-suggest-you-uninstall-it-for-something-else">So why would I suggest you uninstall it for something else?</h2>
+<p>Whilst Microsoft’s vscode source code is open source (MIT-licensed), the product available for download (Visual Studio Code) is licensed under this <a href="https://code.visualstudio.com/license">not-FLOSS license</a> and contains telemetry/tracking.</p>
+
+<blockquote>
+  <p>…may collect information about you and your use of the software, and send that to Microsoft… You may opt-out of many of these scenarios, but not all…</p>
+</blockquote>
+
+<p>Microsoft insist this is for bug tracking and so on, which may well be true. But you never know what else the data could end up being used for in the hands of someone unscrupulous.</p>
+
+<p>You can turn <a href="https://code.visualstudio.com/docs/getstarted/telemetry#_disable-telemetry-reporting">off telemetry reporting</a> in Visual Studio Code, but there are plenty of opportunities for Microsoft to add other features in, which may slip past your attention.</p>
+
+<p>Run this command in your terminal and check your output</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>code <span class="nt">--telemetry</span>
+</code></pre></div></div>
+<p>Not great, lets change it.</p>
+
+<h1 id="vscodium">VSCodium</h1>
+<blockquote>
+  <p>VSCodium … is not a fork. This is a repository of scripts to automatically build Microsoft’s vscode repository into freely-licensed binaries with a community-driven default configuration.</p>
+</blockquote>
+
+<p>This means we don’t have to go through the hassle of building each version ourselves, everything is done for us and the best part is we get these binaries <strong>under the MIT license. Telemetry is completely disabled</strong>.</p>
+
+<p>Moreover, the editor itself looks and functions exactly the same, you won’t miss a thing!</p>
+
+<p><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--XyP_pYce--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://i.imgur.com/nuKSg5v.png" alt="vscodium logo" /></p>
+
+<p>That’s a pretty simple and compelling argument.</p>
+
+<p><img src="https://i.giphy.com/media/C6JQPEUsZUyVq/giphy.gif" alt="same but different" /></p>
+
+<h1 id="how-to-install-vscodium-and-keep-all-your-extensions-and-settings">How to install VSCodium and keep all your extensions and settings</h1>
+
+<p>This is the easy part. I will focus upon macOS, but these instructions are pretty simple to amend to other platforms.</p>
+
+<p><em>updated to include settings</em></p>
+
+<p>Make sure you have <a href="https://brew.sh/">Homebrew</a> installed:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/usr/bin/ruby <span class="nt">-e</span> <span class="s2">"</span><span class="si">$(</span>curl <span class="nt">-fsSL</span> https://raw.githubusercontent.com/Homebrew/install/master/install<span class="si">)</span><span class="s2">"</span>
+</code></pre></div></div>
+<h2 id="1-export-all-your-installed-extensions">1. Export all your installed extensions</h2>
+<p>First export all of your installed extensions into a text file (amend the output path as you see fit)</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>code <span class="nt">--list-extensions</span> | <span class="nb">tee</span> ~/vscode-extensions.txt
+</code></pre></div></div>
+<p>This will output all of your extensions to <code class="highlighter-rouge">~/vscode-extensions.txt</code> and list them out in your terminal for you to see.</p>
+
+<h2 id="2-export-your-settings">2. Export your settings</h2>
+<p>Export any custom keybindings and user settings you have as default.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cp</span> ~/Library/Application<span class="se">\ </span>Support/Code/User/settings.json ~/vscode-settings.json
+
+<span class="nb">cp</span> ~/Library/Application<span class="se">\ </span>Support/Code/User/keybindings.json ~/vscode-keybindings.json
+</code></pre></div></div>
+<h2 id="3-uninstall-visual-studio-code">3. Uninstall Visual Studio Code</h2>
+<p>We use the force argument so that nothing gets left behind that would clash or interrupt VSCodium’s install.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>brew cask uninstall <span class="nt">--force</span> visual-studio-code
+</code></pre></div></div>
+<h2 id="4-install-vscodium">4. Install VSCodium</h2>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>brew cask <span class="nb">install </span>vscodium
+</code></pre></div></div>
+
+<h2 id="5-reinstall-your-extensions-for-vscodium">5. Reinstall your extensions for VSCodium</h2>
+<p>Because VSCodium has the same command line tools, we invoke them the same was as before</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>xargs <span class="nt">-n1</span> code <span class="nt">--install-extension</span> &lt; ~/vscode-extensions.txt
+</code></pre></div></div>
+<p>This went through the file and executed code <code class="highlighter-rouge">--install-extension</code> on each line individually.</p>
+
+<p>You should have seen the output in your terminal.</p>
+
+<p>If you get a <code class="highlighter-rouge">DeprecationWarning: Buffer()...</code> warning, you don’t need to worry, it’s related to Yarn and can be resolved with yarn <code class="highlighter-rouge">global add yarn</code></p>
+
+<h2 id="6-import-your-settings">6. Import your settings</h2>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">mv</span> ~/vscode-settings.json ~/Library/Application<span class="se">\ </span>Support/VSCodium/User/settings.json
+
+<span class="nb">mv</span> ~/vscode-keybindings.json ~/Library/Application<span class="se">\ </span>Support/VSCodium/User/keybindings.json
+</code></pre></div></div>
+<p>Now you should be set and ready to go, the only thing you should notice is the logo is different. Everything else will work, feel and function the same as before.</p>
+
+<p>Happy coding devs!</p>
+:ET

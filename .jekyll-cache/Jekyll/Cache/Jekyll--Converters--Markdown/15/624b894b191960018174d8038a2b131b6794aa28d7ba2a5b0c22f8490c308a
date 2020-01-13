@@ -1,0 +1,101 @@
+I"�<p>Microsoft have made some amazing contributions to the dev community, Visual Studio Code in particular. I recently <a href="https://dev.to/misterf/why-and-how-you-should-to-migrate-from-visual-studio-code-to-vscodium-j7d">made the switch to VSCodium</a> but this doesn’t stop me from using all the same extensions as before.</p>
+
+<p>I’m going to share some extensions I use to make my experience more productive and helpful. Hopefully there will be something useful for you to add to you setup.</p>
+
+<h1 id="project-level-extensions">Project level extensions</h1>
+<h2 id="gistpad"><a href="https://marketplace.visualstudio.com/items?itemName=vsls-contrib.gistfs">Gistpad</a></h2>
+
+<blockquote>
+  <p>…manage GitHub Gists entirely within the editor. You can open, create, delete, fork, star and clone gists, and then seamlessly begin editing files as if they were local…</p>
+</blockquote>
+
+<p>I’ve gone through my fair share of third party apps to manage my gists, this is a welcome addition to vscode.</p>
+
+<p><img src="https://i.giphy.com/media/VEscdYfDUljw5eDMZc/giphy.gif" alt="gistpad animation" /></p>
+
+<h2 id="todo-tree"><a href="https://marketplace.visualstudio.com/items?itemName=Gruntfuggly.todo-tree">TODO Tree</a></h2>
+
+<blockquote>
+  <p>This extension quickly searches (using ripgrep) your workspace for comment tags like TODO and FIXME, and displays them in a tree view in the explorer pane. Clicking a TODO within the tree will open the file and put the cursor on the line containing the TODO.</p>
+</blockquote>
+
+<p>This is really helpful when working in a team or on projects you pick and drop over time.</p>
+
+<p><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--iNcMLghs--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://raw.githubusercontent.com/Gruntfuggly/todo-tree/master/resources/screenshot.png" alt="screenshot" /></p>
+
+<h2 id="gitlens"><a href="https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens">Gitlens</a></h2>
+
+<blockquote>
+  <p>GitLens supercharges the Git capabilities built into Visual Studio Code. It helps you to visualize code authorship at a glance via Git blame annotations and code lens, seamlessly navigate and explore Git repositories, gain valuable insights via powerful comparison commands, and so much more.</p>
+</blockquote>
+
+<p><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--SxsPx3NQ--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://raw.githubusercontent.com/eamodio/vscode-gitlens/master/images/docs/gitlens-preview.gif" alt="gitlens preview" /></p>
+
+<h2 id="project-manager"><a href="https://marketplace.visualstudio.com/items?itemName=alefragnani.project-manager">Project Manager</a></h2>
+
+<blockquote>
+  <p>…helps you to easily access your projects, no matter where they are located… You can define your own Favorite projects, or choose for auto-detect VSCode projects, Git, Mercurial and SVN repositories or any folder.</p>
+</blockquote>
+
+<p><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--0eEIgL5T--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://raw.githubusercontent.com/alefragnani/vscode-project-manager/master/images/vscode-project-manager-side-bar.gif" alt="project manager sidebar" /></p>
+
+<h1 id="code-level-extensions">Code level extensions</h1>
+<h2 id="tech-debt-tracker"><a href="https://marketplace.visualstudio.com/items?itemName=Stepsize.tech-debt-tracker">Tech Debt Tracker</a></h2>
+
+<blockquote>
+  <p>Inline debt ratings, the debt ratings tree, and the function metrics keep quality front of mind. Every function is analysed live &amp; locally to help you write clean code and identify code that needs to be improved.</p>
+</blockquote>
+
+<p>Tech Debt Tracker sends anonymous analytics back to the publisher, which you can turn off from settings if you need to.</p>
+
+<p>What I particulary like about this extension is the inline debt rating at the top of your file.</p>
+
+<p><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--ciH6NrsN--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://user-images.githubusercontent.com/4775299/70737178-3be98d00-1d12-11ea-9a47-410938197352.png" alt="screenshot" /></p>
+
+<h2 id="code-complexity"><a href="https://marketplace.visualstudio.com/items?itemName=kisstkondoros.vscode-codemetrics">Code Complexity</a></h2>
+<p>Computes complexity in TypeScript / JavaScript / Lua files. It’s not a standard metric, but it is a close approximation of Cyclomatic complexity.</p>
+
+<p>Just like the previous extension, this puts a handy inline notice at the top of the file.</p>
+
+<p><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--n4l3u7Xz--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://raw.githubusercontent.com/kisstkondoros/codemetrics/master/images/metric_details.png" alt="screenshot" /></p>
+
+<h2 id="import-cost"><a href="https://marketplace.visualstudio.com/items?itemName=wix.vscode-import-cost">Import Cost</a></h2>
+
+<blockquote>
+  <p>This extension will display inline in the editor the size of the imported package. The extension utilizes webpack with babili-webpack-plugin in order to detect the imported size.</p>
+</blockquote>
+
+<h1 id="ui-level-enhancements">UI level enhancements</h1>
+<h2 id="bracket-pair-colorizer-2"><a href="https://marketplace.visualstudio.com/items?itemName=CoenraadS.bracket-pair-colorizer-2">Bracket Pair Colorizer 2</a></h2>
+
+<blockquote>
+  <p>This extension allows matching brackets to be identified with colours. The user can define which tokens to match, and which colours to use.</p>
+</blockquote>
+
+<p><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--_Bdo-Tmc--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://raw.githubusercontent.com/CoenraadS/BracketPair/develop/images/example.png" alt="screenshot" /></p>
+
+<h2 id="indented-block-highlighting"><a href="https://marketplace.visualstudio.com/items?itemName=byi8220.indented-block-highlighting">Indented Block Highlighting</a></h2>
+
+<blockquote>
+  <p>Highlights the intented area that contains the cursor.</p>
+</blockquote>
+
+<p>This might be a little overkill, but I like it combined with Bracket Pair Colorizer.</p>
+
+<p><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--cKek039A--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://raw.githubusercontent.com/byi8220/indented-block-highlighting/master/usage.gif" alt="demo" /></p>
+
+<h2 id="indenticator"><a href="https://marketplace.visualstudio.com/items?itemName=SirTori.indenticator">Indenticator</a></h2>
+
+<blockquote>
+  <p>Visually highlights the current indent depth</p>
+</blockquote>
+
+<p><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--T_J01r-O--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://raw.githubusercontent.com/SirTori/indenticator/master/img/demo.gif" alt="demo" /></p>
+
+<h2 id="image-preview"><a href="https://marketplace.visualstudio.com/items?itemName=kisstkondoros.vscode-gutter-preview">Image Preview</a></h2>
+<p>This handy extension allows you to see image previews in the gutter or on hover.</p>
+
+<p><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--WKAjCwwo--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://raw.githubusercontent.com/kisstkondoros/gutter-preview/master/images/sample.png" alt="screenshot" /></p>
+
+<p>There are plenty more extensions, but these are the ones I enjoy using. Hopefully there is something new here for you or you can suggest something, I’m always looking for ways to make my development experience better!</p>
+:ET
