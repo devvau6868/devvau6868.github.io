@@ -9,25 +9,26 @@ tags: [Laravel, Vue] # add tag
 
 It's been a while since I wrote about Laravel and thought I should do something fun with it. In this tutorial, I will show you how to build a web-based chat application using Laravel and Vue.js quickly. With a simple step by step guide, you will be able to create a system that supports user authentication and authorization before participating in a chat session.
 
-> Table of Contents
-    * What we will build
-    * Prerequisites
-    * CometChat?
-    * CometChat’s authentication flow
-    * Creating an authentication server using Laravel
-    * Setting up the Laravel application
-    * Creating routes
-    * Create the User Controller
-    * Create the master layout
-    * Getting started with the frontend
-    * Initialize CometChat
-    * Register and create a new user
-    * Authenticating users
-    * The chat view
-    * Update the router
-    * Configure the entry point
-    * Test the application
-    * Conclusion
+>   Table of Contents
+> 
+>       * What we will build
+>       * Prerequisites
+>       * CometChat?
+>       * CometChat’s authentication flow
+>       * Creating an authentication server using Laravel
+>       * Setting up the Laravel application
+>       * Creating routes
+>       * Create the User Controller
+>       * Create the master layout
+>       * Getting started with the frontend
+>       * Initialize CometChat
+>       * Register and create a new user
+>       * Authenticating users
+>       * The chat view
+>       * Update the router
+>       * Configure the entry point
+>       * Test the application
+>       * Conclusion
 
 Due to the fact that Laravel is shipped with Vue.js by default, It is very easy to build single-page applications, handle frontend logic by creating [Vue components](https://vuejs.org/v2/guide/components.html) and use them like you would use a regular HTML tag inside the blade template of Laravel.
 
@@ -35,6 +36,7 @@ To make this chat application fully functional, you will leverage CometChat chat
 
 # What we will build
 At the end of this tutorial, you would have built a system that will allow users to send and receive messages in realtime, as shown below:
+
 ![](https://paper-attachments.dropbox.com/s_D634BB25EFFC0EAA9BC956CCBF00962894D99381865724A63C8FE9C72B11A92B_1576004249041_ezgif.com-video-to-gif+2.gif)
 
 
@@ -308,7 +310,7 @@ Replace the `YOUR_COMMETCHAT_API_KEY, YOUR_COMMETCHAT_APP_ID, YOUR_COMMETCHAT_GU
 # Initialize CometChat
 It is recommended by CometChat that your application must call the `init()` method from the JavaScript SDK once your app starts. This will enable your app to communicate with the CometChat server easily. To achieve that, navigate to `resources/js/App.vue` file and update the script section with the following code:
 
-{% highlight vue %}
+{% highlight javascript %}
 // resources/js/App.vue
 
 <script>
@@ -349,7 +351,7 @@ The approach for this application is to register a user into your application an
 
 To begin, you will create a new folder named `views` within `resources/js` folder. And within the newly created folder, create a new file and call it `Register.vue`. Open it and update its `<template></template>` section with the following content:
 
-{% highlight vue %}
+{% highlight javascript %}
 // resources/js/views/Register.vue
 <template>
     <div class="login-page">
@@ -395,7 +397,7 @@ The code snippet above contains input fields that will be used to obtain the `us
 
 Now, within the `<script></script>` section of the Register Component, paste the following code:
 
-{% highlight vue %}
+{% highlight javascript %}
 // resources/js/views/Register.vue
 
 <script>
@@ -444,7 +446,7 @@ If the registration process was successful, a new method to programmatically cre
 **Create a user on CometChat**
 
 Add the following method to create the user on CometChat:
-{% highlight vue %}
+{% highlight javascript %}
 // resources/js/views/Register.vue
 
 async createUserOnCometChat(username) {
@@ -479,7 +481,7 @@ async createUserOnCometChat(username) {
 This method takes the username of the registered user after a successful sign-up process and passes it along with a custom name to CometChat Create User API. After the user has been created successfully, another method to create an auth via the CometChat API for the new user was also invoked.
 
 **Creating a new CometChat auth token** Add the method below to create an auth token for the user and the token in your database once the process is completed:
-{% highlight vue %}
+{% highlight javascript %}
 // resources/js/views/Register.vue
 
 async createAuthTokenAndSaveForUser(uid) {
@@ -506,7 +508,7 @@ async createAuthTokenAndSaveForUser(uid) {
 
 **Add user to a group** CometChat has already created members for the default group for your application automatically. So, before users that are created through your Laravel application can participate in a chat session, they need to be added as a member. Use the following method to add users of your application to a group:
 
-{% highlight vue %}
+{% highlight javascript %}
 // resources/js/views/Register.vue
 
 async addUserToAGroup(uid) {
@@ -536,7 +538,7 @@ async addUserToAGroup(uid) {
 
 **Save AuthToken in database** Having generated an `AuthToken` for your app users on CometChat, you need to save the token in the database for that particular user. With this in place, the token can be retrieved as part of the user's details when authenticating the user within your application. Add the method below for that purpose:
 
-{% highlight vue %}
+{% highlight javascript %}
 // resources/js/views/Register.vue
 
 sendTokenToServer(token, uid) {
@@ -554,7 +556,7 @@ Since you can now register users, create such users on CometChat and add them as
 
 To begin, create a new file within `resources/js/views` folder and name it `Login.vue`. Open the newly created file and update the `<template></template>` section with the following code:
 
-{% highlight vue %}
+{% highlight javascript %}
 // resources/js/views/Login.vue
 
 <template>
@@ -592,7 +594,7 @@ To begin, create a new file within `resources/js/views` folder and name it `Logi
 </template>
 {% endhighlight %}
 Here, the HTML form will receive the inputted value for the `username` and `password` of a user and send it to be processed by the `authLoginAppUser()` method once the form is submitted. Next, use the content below to update the `<script></script>` section of the Login component:
-{% highlight %}
+{% highlight vue %}
 // resources/js/views/Login.vue
 <script>
     import { CometChat } from "@cometchat-pro/chat";
@@ -635,7 +637,7 @@ The `authLoginAppUser()` method will receive the `username` and `password` of a 
 
 The returned `authToken` will now be used to log the user in on CometChat. Add the following method, immediately after the `authLoginAppUser` for that purpose:
 
-{% highlight vue %}
+{% highlight javascript %}
 logUserInToCometChat(token) {
     this.showSpinner = true;
     CometChat.login(token).then(
@@ -665,7 +667,7 @@ Here, you called the `login()` method from CometChat SDK and passed the `authTok
 # The chat view
 Create a new file named `Chat.vue` within the `resources/js/views` and update the `<template></template>` section with the following content:
 
-{% highlight vue %}
+{% highlight javascript %}
 // resources/js/views/Chat.vue
 
 <template>
@@ -763,7 +765,7 @@ Also included is a form with an input field that will be used by a user to send 
 
 Get the logged in user details You will retrieve the details of the currently logged in user by calling a method named `getLoggedInUser()`. This will return a [User](https://prodocs.cometchat.com/docs/js-appendix#section-user) object containing all the information related to the logged-in user. Begin by adding this `<script>` section to this component. Place the contents below within the `Chat.vue` immediately after the closing tag of the `<template>` section:
 
-{% highlight vue %}
+{% highlight javascript %}
 // resources/js/views/Chat.vue
 
 <script>
@@ -817,7 +819,7 @@ Once the details of the currently authenticated user are retrieved, the name, th
 
 **Send new messages** Add the method below to implement the logic to send a new message to CometChat server during a group chat session:
 
-{% highlight vue %}
+{% highlight javascript %}
 sendGroupMessage() {
     this.sendingMessage = true;
     var receiverID = process.env.MIX_COMMETCHAT_GUID;
@@ -847,7 +849,7 @@ sendGroupMessage() {
 {% endhighlight %}
 
 Here, you called the `sendMessage()` method and passed a constructed `TextMessage()` to it. The `TextMessage` class constructor takes the `GUID`, messageText and receiverType as parameters. **Receive incoming messages and Fetch** previous messages Lastly, add the following method to receive real-time incoming messages posted to a group by its participants:
-{% highlight vue %}
+{% highlight javascript %}
 export default {
     ...
     mounted() {
@@ -901,7 +903,7 @@ An event listener that takes a unique listenerID as a parameter was registered t
 
 # Update the router
 Now, in order to render a component for each given path, you will update the generated router file within the project. Open the router file located in `.resources/js/routes.js` and replace its content with the following:
-
+{% highlight vue %}
 // resources/js/routes.js
 
 import Vue from 'vue';
@@ -976,7 +978,7 @@ php artisan serve
 {% endhighlight %}
 
 This will start the application on the default port 8000. Next, to start the frontend application, use npm as shown here:
-{% highlight %}
+{% highlight bash %}
 npm run watch
 {% endhighlight %}
 
