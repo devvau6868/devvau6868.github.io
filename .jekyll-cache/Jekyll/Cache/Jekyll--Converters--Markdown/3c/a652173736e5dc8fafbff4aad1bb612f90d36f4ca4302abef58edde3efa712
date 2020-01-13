@@ -1,0 +1,26 @@
+I"Þ<ul id="my_toc" class="inline_toc">
+  <li><a href="#project-level-extensions">Project level extensions</a>
+    <ul>
+      <li><a href="#gistpad">Gistpad</a></li>
+      <li><a href="#todo-tree">TODO Tree</a></li>
+      <li><a href="#gitlens">Gitlens</a></li>
+      <li><a href="#project-manager">Project Manager</a></li>
+    </ul>
+  </li>
+  <li><a href="#code-level-extensions">Code level extensions</a>
+    <ul>
+      <li><a href="#tech-debt-tracker">Tech Debt Tracker</a></li>
+      <li><a href="#code-complexity">Code Complexity</a></li>
+      <li><a href="#import-cost">Import Cost</a></li>
+    </ul>
+  </li>
+  <li><a href="#ui-level-enhancements">UI level enhancements</a>
+    <ul>
+      <li><a href="#bracket-pair-colorizer-2">Bracket Pair Colorizer 2</a></li>
+      <li><a href="#indented-block-highlighting">Indented Block Highlighting</a></li>
+      <li><a href="#indenticator">Indenticator</a></li>
+      <li><a href="#image-preview">Image Preview</a></li>
+    </ul>
+  </li>
+</ul>
+:ET

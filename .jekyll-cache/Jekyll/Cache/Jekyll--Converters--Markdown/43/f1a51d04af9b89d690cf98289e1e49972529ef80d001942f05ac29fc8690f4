@@ -1,0 +1,19 @@
+I"1<ul id="my_toc" class="inline_toc">
+  <li><a href="#the-problem-with-visual-studio-code">The problem with Visual Studio Code</a>
+    <ul>
+      <li><a href="#so-why-would-i-suggest-you-uninstall-it-for-something-else">So why would I suggest you uninstall it for something else?</a></li>
+    </ul>
+  </li>
+  <li><a href="#vscodium">VSCodium</a></li>
+  <li><a href="#how-to-install-vscodium-and-keep-all-your-extensions-and-settings">How to install VSCodium and keep all your extensions and settings</a>
+    <ul>
+      <li><a href="#1-export-all-your-installed-extensions">1. Export all your installed extensions</a></li>
+      <li><a href="#2-export-your-settings">2. Export your settings</a></li>
+      <li><a href="#3-uninstall-visual-studio-code">3. Uninstall Visual Studio Code</a></li>
+      <li><a href="#4-install-vscodium">4. Install VSCodium</a></li>
+      <li><a href="#5-reinstall-your-extensions-for-vscodium">5. Reinstall your extensions for VSCodium</a></li>
+      <li><a href="#6-import-your-settings">6. Import your settings</a></li>
+    </ul>
+  </li>
+</ul>
+:ET

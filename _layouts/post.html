@@ -19,7 +19,7 @@ layout: home
         <h1 class="page-title">{{page.title}}</h1>
         <div class="page-date"><span>{{page.date | date: '%Y, %b %d'}}&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
       </header>
-      {% include toc.html html=content sanitize=true class="inline_toc" id="my_toc" h_min=2 h_max=3 %}
+      {% include toc.html html=content sanitize=true class="inline_toc" id="my_toc" h_min=1 h_max=6 %}
       {{content | markdownify}}
       <div class="page-footer">
         <div class="page-share">

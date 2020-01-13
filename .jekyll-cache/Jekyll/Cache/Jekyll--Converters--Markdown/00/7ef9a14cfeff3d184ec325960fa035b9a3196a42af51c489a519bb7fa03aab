@@ -1,0 +1,21 @@
+I"N<ul id="my_toc" class="inline_toc">
+  <li><a href="#what-we-will-build">What we will build</a></li>
+  <li><a href="#prerequisites">Prerequisites</a></li>
+  <li><a href="#cometchat">CometChat?</a></li>
+  <li><a href="#cometchats-authentication-flow">CometChat’s authentication flow</a></li>
+  <li><a href="#creating-an-authentication-server-using-laravel">Creating an authentication server using Laravel</a></li>
+  <li><a href="#setting-up-the-laravel-application">Setting up the Laravel application</a></li>
+  <li><a href="#creating-routes">Creating routes</a></li>
+  <li><a href="#create-the-user-controller">Create the User Controller</a></li>
+  <li><a href="#create-the-master-layout">Create the master layout</a></li>
+  <li><a href="#getting-started-with-the-frontend">Getting started with the frontend</a></li>
+  <li><a href="#initialize-cometchat">Initialize CometChat</a></li>
+  <li><a href="#register-and-create-a-new-user">Register and create a new user</a></li>
+  <li><a href="#authenticating-users">Authenticating users</a></li>
+  <li><a href="#the-chat-view">The chat view</a></li>
+  <li><a href="#update-the-router">Update the router</a></li>
+  <li><a href="#configure-the-entry-point">Configure the entry point</a></li>
+  <li><a href="#test-the-application">Test the application</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+</ul>
+:ET
