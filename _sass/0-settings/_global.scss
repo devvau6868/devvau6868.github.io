@@ -132,8 +132,7 @@ $global-transition: .35s;
   }
   
   .clearfix::before, .clearfix::after {
-	content: "";
-	display: table;
+	display: flex;
   }
   
   .clearfix::after {
