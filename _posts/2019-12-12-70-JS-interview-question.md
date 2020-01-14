@@ -155,12 +155,15 @@ Event Propagation
 When an event occurs on a DOM element, that event does not entirely occur on that just one element. In the Bubbling Phase, the event bubbles up or it goes to its parent, to its grandparents, to its grandparent's parent until it reaches all the way to the window.
 
 If we have an example markup like this.
+```html
  <div class="grandparent">
     <div class="parent">
       <div class="child">1</div>
     </div>
   </div>
+```
 And our js code.
+```js
 function addEvent(el, event, callback, isCapture = false) {
   if (!el || !event || !callback || typeof callback !== 'function') return;
   if (typeof el === 'string') {
@@ -199,18 +202,22 @@ addEvent(document, 'DOMContentLoaded', () => {
   })
 
 });
+```
 The addEventListener method has a third optional parameter useCapture with a default value of false the event will occur in the Bubbling phase if true the event will occur in the Capturing Phase. If we click on the child element it logs child,parent,grandparent, html, document and window respectively on the console. This is Event Bubbling.
 
 # 8. What's Event Capturing?
 When an event occurs on a DOM element, that event does not entirely occur on that just one element. In Capturing Phase, the event starts from the window all the way down to the element that triggered the event.
 
 If we have an example markup like this.
+```html
  <div class="grandparent">
     <div class="parent">
       <div class="child">1</div>
     </div>
   </div>
+```
 And our js code.
+```js
 function addEvent(el, event, callback, isCapture = false) {
   if (!el || !event || !callback || typeof callback !== 'function') return;
   if (typeof el === 'string') {
@@ -249,6 +256,7 @@ addEvent(document, 'DOMContentLoaded', () => {
   }, true)
 
 });
+```
 The addEventListener method has a third optional parameter useCapture with a default value of false the event will occur in the Bubbling phase if true the event will occur in the Capturing Phase. If we click on the child element it logs window,document,html, grandparent and parent and child respectively on the console. This is Event Capturing.
 
 # 9. What's the difference between event.preventDefault() and event.stopPropagation() methods?
@@ -258,15 +266,18 @@ The event.preventDefault() method prevents the default behavior of an element. I
 We can use the event.defaultPrevented property in the event object. It returns a boolean indicating if the event.preventDefault() was called in a particular element.
 
 # 11. Why does this code obj.someprop.x throw an error?
+```js
 const obj = {};
 console.log(obj.someprop.x);
-↑Obviously, this throws an error due to the reason we are trying to access a
+```
+Obviously, this throws an error due to the reason we are trying to access a
 x property in the someprop property which have an undefined value. Remember properties in an object which does not exist in itself and its prototype has a default value of undefined and undefined has no property x.
 
 # 12. What is event.target ?
 In simplest terms, the event.target is the element on which the event occurred or the element that triggered the event.
 
 Sample HTML Markup.
+```html
 <div onclick="clickFunc(event)" style="text-align: center;margin:15px;
 border:1px solid red;border-radius:3px;">
     <div style="margin: 25px; border:1px solid royalblue;border-radius:3px;">
@@ -281,6 +292,7 @@ Sample JavaScript.
  function clickFunc(event) {
   console.log(event.target);
 }
+```
 If you click the button it will log the button markup even though we attach the event on the outermost div it will always log the button so we can conclude that the event.target is the element that triggered the event.
 
 # 13. What is event.currentTarget?
@@ -288,6 +300,7 @@ The event.currentTarget is the element on which we attach the event handler expl
 
 Copying the markup in Question 12.
 Sample HTML Markup.
+```html
 <div onclick="clickFunc(event)" style="text-align: center;margin:15px;
 border:1px solid red;border-radius:3px;">
     <div style="margin: 25px; border:1px solid royalblue;border-radius:3px;">
@@ -298,6 +311,7 @@ border:1px solid red;border-radius:3px;">
         </div>
     </div>
   </div>
+```
 And changing our the JS a little bit.
 function clickFunc(event) {
   console.log(event.currentTarget);
@@ -327,13 +341,15 @@ Note: toPrimitive uses first the valueOf method then the toString method in obje
 
 Let's have examples.
 
-x   y   x == y
-5   5   true
-1   '1' true
-null    undefined   true
-0   false   true
-'1,2'   [1,2]   true
-'[object Object]'   {}  true
+| x |  y |   x == y|
+|-|-|-|
+| 5 |  5 |   true| 
+| 1 |  '1'|  true| 
+| null |   undefined  |  true| 
+| 0 |  false |   true
+| '1,2'|   [1,2] |   true| 
+| '[object Object]' |  {}  true| 
+
 These examples all return true.
 
 The first example goes to condition one because x and y have the same type and value.
@@ -347,7 +363,7 @@ The fourth example goes to condition seven because y is boolean.
 The fifth example goes to condition eight. The array is converted to a string using the toString() method which returns 1,2.
 
 The last example goes to condition ten. The object is converted to a string using the toString() method which returns [object Object].
-
+```js
 x   y   x === y
 5   5   true
 1   '1' false
@@ -355,20 +371,24 @@ null    undefined   false
 0   false   false
 '1,2'   [1,2]   false
 '[object Object]'   {}  false
+```
 If we use the === operator all the comparisons except for the first example will return false because they don't have the same type while the first example will return true because the two have the same type and value.
 
 # 15. Why does it return false when comparing two similar objects in JavaScript?
 Suppose we have an example below.
+```js
 let a = { a: 1 };
 let b = { a: 1 };
 let c = a;
 
 console.log(a === b); // logs false even though they have the same property
 console.log(a === c); // logs true hmm
+```
 JavaScript compares objects and primitives differently. In primitives it compares them by value while in objects it compares them by reference or the address in memory where the variable is stored. That's why the first console.log statement returns false and the second console.log statement returns true. a and c have the same reference and a and b are not.
 
 # 16. What does the !! operator do?
 The Double NOT operator or !! coerces the value on the right side into a boolean. basically it's a fancy way of converting a value into a boolean.
+```js
 console.log(!!null); //logs false
 console.log(!!undefined); //logs false
 console.log(!!''); //logs false
@@ -379,8 +399,10 @@ console.log(!!{}); //logs true
 console.log(!![]); //logs true
 console.log(!!1); //logs true
 console.log(!![].length); //logs false
+```
 # 17. How to evaluate multiple expressions in one line?
 ↑We can use the , or comma operator to evaluate multiple expressions in one line. It evaluates from left-to-right and returns the value of the last item on the right or the last operand.
+```js
 let x = 5;
 
 x = (x++ , x = addFive(x), x *= 2, x -= 5, x += 10);
@@ -388,6 +410,7 @@ x = (x++ , x = addFive(x), x *= 2, x -= 5, x += 10);
 function addFive(num) {
   return num + 5;
 }
+```
 If you log the value of x it would be 27. First, we increment the value of x it would be 6, then we invoke the function addFive(6) and pass the 6 as a parameter and assign the result to x the new value of x would be 11. After that, we multiply the current value of x to 2 and assign it to x the updated value of x would be 22. Then, we subtract the current value of x to 5 and assign the result to x the updated value would be 17. And lastly, we increment the value of x by 10 and assign the updated value to x now the value of x would be 27.
 
 # 18. What is Hoisting?
@@ -403,6 +426,7 @@ Execution - in this phase it assigns values to the variables hoisted earlier and
 Note: only function declarations and variables declared with the var keyword are hoisted not function expressions or arrow functions, let and const keywords.
 
 Ok, suppose we have an example code in the global scope below.
+```js
 console.log(y);
 y = 1;
 console.log(y);
@@ -413,9 +437,11 @@ function greet(name){
 }
 
 var y;
+```
 This code logs undefined,1, Hello Mark! respectively.
 
 So the compilation phase would look like this.
+```js
 function greet(name) {
   return 'Hello ' + name + '!';
 }
@@ -431,10 +457,11 @@ y = 1;
 console.log(y);
 console.log(greet("Mark"));
 */
-
+```
 for example purposes, I commented on the assignment of variable and function call.
 
 After the compilation phase finishes it starts the execution phase invoking methods and assigns values to variables.
+```js
 function greet(name) {
   return 'Hello ' + name + '!';
 }
@@ -447,10 +474,12 @@ console.log(y);
 y = 1;
 console.log(y);
 console.log(greet("Mark"));
+```
 # 19. What is Scope?
 Scope in JavaScript is the area where we have valid access to variables or functions. JavaScript has three types of Scopes. Global Scope, Function Scope, and Block Scope(ES6).
 
 Global Scope - variables or functions declared in the global namespace are in the global scope and therefore is accessible everywhere in our code.
+```js 
    //global namespace
    var g = "global";
 
@@ -460,7 +489,9 @@ Global Scope - variables or functions declared in the global namespace are in th
      }
      innerFunc();
    }  
+```
 Function Scope - variables,functions and parameters declared within a function are accessible inside that function but not outside of it.
+```js
     function myFavoriteFunc(a) {
        if (true) {
           var b = "Hello " + a;
@@ -471,7 +502,9 @@ Function Scope - variables,functions and parameters declared within a function a
 
    console.log(a); // Throws a ReferenceError "a" is not defined
    console.log(b); // does not continue here 
+```
 Block Scope - variables (let,const) declared within a block {} can only be access within it.
+```js
  function testBlock(){
    if(true){
      let z = 5;
@@ -480,7 +513,9 @@ Block Scope - variables (let,const) declared within a block {} can only be acces
  }
 
  testBlock(); // Throws a ReferenceError "z" is not defined
+```
 Scope is also a set of rules for finding variables. If a variable does not exist in the current scope it look ups and searches for a variable in the outer scope and if does not exist again it looks up again until it reaches the global scope if the variable exists then we can use it if not it throws an error. It searches for the nearest variable and it stops searching or looking up once it finds it. This is called Scope Chain.
+```js
    /* Scope Chain
    Inside inner function perspective
 
@@ -506,6 +541,7 @@ Scope is also a set of rules for finding variables. If a variable does not exist
 // logs Hello World 
 // because (variable2 = "Hello") and (variable1 = "World") are the nearest 
 // variables inside inner's scope.
+```
 Scope
 
 # 20. What are Closures?
@@ -514,6 +550,7 @@ This is probably the hardest question of all these questions because Closures is
 Closures is simply the ability of a function at the time of declaration to remember the references of variables and parameters on its current scope, on its parent function scope, on its parent's parent function scope until it reaches the global scope with the help of Scope Chain. Basically it is the Scope created when the function was declared.
 
 Examples are a great way to explain closures.
+```js
    //Global's Scope
    var globalVar = "abc";
 
@@ -528,6 +565,7 @@ Examples are a great way to explain closures.
 
       a's scope -> global's scope  
    */ 
+```
 In this example, when we declare the a function the Global Scope is part of a's closure.
 
 a's closure
@@ -536,6 +574,7 @@ The reason for the variable globalVar which does not have a value in the image b
 But in our example above the globalVar variable will have the value of abc.
 
 Ok, let's have a complex example.
+```js
 var globalVar = "global";
 var outerVar = "outer"
 
@@ -550,6 +589,7 @@ const x = outerFunc(outerVar);
 outerVar = "outer-2";
 globalVar = "guess"
 x("inner");
+```
 Complex
 This will print "guess outer inner". The explanation for this is that when we invoke the outerFunc function and assigned the returned value the innerFunc function to the variable x, the outerParam will have a value of outer even though we assign a new value outer-2 to the outerVar variable because
 the reassignment happened after the invocation of the outer function and in that time when we invoke the outerFunc function it's look up the value of outerVar in the Scope Chain, the outerVar will have a value of "outer". Now, when we invoke the x variable which have a reference to the innerFunc, the
@@ -557,6 +597,7 @@ innerParam will have a value of inner because thats the value we pass in the inv
 guess.
 
 We have an example that demonstrates a problem of not understanding closure correctly.
+```js
 const arrFuncs = [];
 for(var i = 0; i < 5; i++){
   arrFuncs.push(function (){
@@ -568,14 +609,16 @@ console.log(i); // i is 5
 for (let i = 0; i < arrFuncs.length; i++) {
   console.log(arrFuncs[i]()); // all logs "5"
 }
+```
 This code is not working as we expected because of Closures.
 The var keyword makes a global variable and when we push a function
 we return the global variable i. So when we call one of those functions in that array after the loop it logs 5 because we get
 the current value of i which is 5 and we can access it because it's a global variable. Because Closures keeps the references of that variable not its values at the time of it's creation. We can solve this using IIFES or changing the var keyword to let for block-scoping.
 
 # 21. What are the falsy values in JavaScript?
-↑
+```js
  const falsyValues = ['', 0, null, undefined, NaN, false];
+```
 falsy values are values that when converted to boolean becomes false.
 
 # 22. How to check if a value is falsy?
@@ -587,17 +630,22 @@ Use the Boolean function or the Double NOT operator !!
 Restrictions that Strict Mode gives us.
 
 Assigning or Accessing a variable that is not declared.
+```js
  function returnY(){
     "use strict";
     y = 123;
     return y;
  }
+```
 Assigning a value to a read-only or non-writable global variable;
+```js
    "use strict";
    var NaN = NaN;
    var undefined = undefined;
    var Infinity = "and beyond";
+```
 Deleting an undeletable property.
+```js
    "use strict";
    const obj = {};
 
@@ -606,20 +654,25 @@ Deleting an undeletable property.
    });  
 
    delete obj.x;
+```
 Duplicate parameter names.
+```js
    "use strict";
 
    function someFunc(a, b, b, c){
 
    }
+```
 Creating variables with the use of the eval function.
+```js
  "use strict";
 
  eval("var x = 1;");
 
  console.log(x); //Throws a Reference Error x is not defined
-
+```
 The default value of this will be undefined.
+```js
   "use strict";
 
   function showMeThis(){
@@ -627,10 +680,12 @@ The default value of this will be undefined.
   }
 
   showMeThis(); //returns undefined
+```
 There are many more restrictions in Strict Mode than these.
 
 # 24. What's the value of this in JavaScript?
 Basically, this refers to the value of the object that is currently executing or invoking the function. I say currently due to the reason that the value of this changes depending on the context on which we use it and where we use it.
+```js
    const carDetails = {
      name: "Ford Mustang",
      yearBought: 2005,
@@ -641,24 +696,33 @@ Basically, this refers to the value of the object that is currently executing or
    };
 
    console.log(carDetails.getName()); // logs Ford Mustang
+```
 This is what we would normally expect because in the getName method we return this.name, this in this context refers to the object which is the carDetails object that is currently the "owner" object of the function executing.
 
 Ok, Let's some add some code to make it weird. Below the console.log statement add this three lines of code
+```js
    var name = "Ford Ranger";
    var getCarName = carDetails.getName;
 
    console.log(getCarName()); // logs Ford Ranger
-The second console.log statement prints the word Ford Ranger which is weird because in our first console.log statement it printed Ford Mustang. The reason to this is that the getCarName method has a different "owner" object that is the window object. Declaring variables with the var keyword in the global scope attaches properties in the window object with the same name as the variables. Remember this in the global scope refers to the window object when "use strict" is not used.
+```
+The second console.log statement prints the word Ford Ranger which is weird because in our first console.log statement it printed Ford Mustang. The reason to this is that the getCarName method has a different "owner" object that is the window object. Declaring variables with the var keyword in the global scope attaches properties in the window object with the same name as the variables. Remember this in the global scope refers to the window object when 
+"use strict" is not used.
+```js
   console.log(getCarName === window.getCarName); //logs true
   console.log(getCarName === this.getCarName); // logs true
+```
 this and window in this example refer to the same object.
 
 One way of solving this problem is by using the apply and call methods in functions.
+```js
    console.log(getCarName.apply(carDetails)); //logs Ford Mustang
    console.log(getCarName.call(carDetails));  //logs Ford Mustang
+```
 The apply and call methods expects the first parameter to be an object which would be value of this inside that function.
 
 IIFE or Immediately Invoked Function Expression, Functions that are declared in the global scope, Anonymous Functions and Inner functions in methods inside an object has a default of this which points to the window object.
+```js
    (function (){
      console.log(this);
    })(); //logs the "window" object
@@ -687,9 +751,11 @@ IIFE or Immediately Invoked Function Expression, Functions that are declared in 
    myFavoriteObj.thisIsAnnoying(function (){
      console.log(this); //logs the "window" object
    });
+```
 If we want to get the value of the name property which is Marko Polo in the myFavoriteObj object there are two ways to solve this.
 
 First, we save the value of this in a variable.
+```js
    const myFavoriteObj = {
      guessThis(){
          const self = this; //saves the this value to the "self" variable
@@ -703,9 +769,11 @@ First, we save the value of this in a variable.
        callback();
      }
    };
+```
 In this image we save the value of this which would be the myFavoriteObj object. So we can access it inside the getName inner function.
 
 Second, we use ES6 Arrow Functions.
+```js
    const myFavoriteObj = {
      guessThis(){
          const getName = () => { 
@@ -719,18 +787,24 @@ Second, we use ES6 Arrow Functions.
        callback();
      }
    };
+```
 Arrow Functions does not have its own this. It copies the value of this of the enclosing lexical scope or in this example the value of this outside the getName inner function which would be the myFavoriteObj object. We can also determine the value of this on how the function is invoked.
 
 # 25. What is the prototype of an object?
 A prototype in simplest terms is a blueprint of an object. It is used as a fallback for properties and methods if it does exist in the current object. It's the way to share properties and functionality between objects. It's the core concept around JavaScript's Prototypal Inheritance.
+```js
   const o = {};
   console.log(o.toString()); // logs [object Object] 
+```
 Even though the o.toString method does not exist in the o object it does not throw an error instead returns a string [object Object]. When a property does not exist in the object it looks into its prototype and if it still does not exist it looks into the prototype's prototype and so on until it finds a property with the same in the Prototype Chain. The end of the Prototype Chain is the Object.prototype.
+```js
    console.log(o.toString === Object.prototype.toString); // logs true
    // which means we we're looking up the Prototype Chain and it reached 
    // the Object.prototype and used the "toString" method.
+```
 # 26. What is an IIFE, what is the use of it?
 An IIFE or Immediately Invoked Function Expression is a function that is gonna get invoked or executed after its creation or declaration. The syntax for creating IIFE is that we wrap the function (){} inside a parentheses () or the Grouping Operator to treat the function as an expression and after that we invoke it with another parentheses (). So an IIFE looks like this (function(){})().
+```js
 (function () {
 
 }());
@@ -756,6 +830,7 @@ const utility = (function () {
       //utilities
    };
 })
+```
 These examples are all valid IIFE. The second to the last example shows we can pass arguments to an IIFE function. The last example shows that we can save the result of the IIFE to a variable so we can reference it later.
 
 The best use of IIFE is making initialization setup functionalities and to avoid naming collisions with other variables in the global scope or polluting the global namespace. Let's have an example.
@@ -763,6 +838,7 @@ The best use of IIFE is making initialization setup functionalities and to avoid
 Suppose we have a link to a library somelibrary.js that exposes some global functions that we use can in our code but this library has two methods that we don't use createGraph and drawGraph because these methods have bugs in them. And we want to implement our own createGraph and drawGraph methods.
 
 One way of solving this is by changing the structure of our scripts.
+```html
 <script src="https://cdnurl.com/somelibrary.js"></script>
 <script>
    function createGraph() {
@@ -772,9 +848,11 @@ One way of solving this is by changing the structure of our scripts.
       // drawGraph logic here
    }
 </script>
+```
 When we use this solution we are overriding those two methods that the library gives us.
 
 Another way of solving this is by changing the name of our own helper functions.
+```html
 <script src="https://cdnurl.com/somelibrary.js"></script>
 <script>
    function myCreateGraph() {
@@ -784,9 +862,12 @@ Another way of solving this is by changing the name of our own helper functions.
       // drawGraph logic here
    }
 </script>
+```
+
 When we use this solution we will also change those function calls to the new function names.
 
 Another way is using an IIFE.
+```html
 <script src="https://cdnurl.com/somelibrary.js"></script>
 <script>
    const graphUtility = (function () {
@@ -802,19 +883,23 @@ Another way is using an IIFE.
       }
    })
 </script>
+```
 In this solution, we are making a utility variable that is the result of IIFE which returns an object that contains two methods createGraph and drawGraph.
 
 Another problem that IIFE solves is in this example.
+```js
 var li = document.querySelectorAll('.list-group > li');
 for (var i = 0, len = li.length; i < len; i++) {
    li[i].addEventListener('click', function (e) {
       console.log(i);
    })
 }
+```
 Suppose we have a ul element with a class of list-group and it has 5 li child elements. And we want to console.log the value of i when we click an individual li element.
 But the behavior we want in this code does not work. Instead, it logs 5 in any click on an li element. The problem we're having is due to how Closures work. Closures are simply the ability of functions to remember the references of variables on its current scope, on its parent function scope and in the global scope. When we declare variables using the var keyword in the global scope, obviously we are making a global variable i. So when we click an li element it logs 5 because that is the value of i when we reference it later in the callback function.
 
 One solution to this is an IIFE.
+```js
 var li = document.querySelectorAll('.list-group > li');
 for (var i = 0, len = li.length; i < len; i++) {
    (function (currentIndex) {
@@ -823,10 +908,12 @@ for (var i = 0, len = li.length; i < len; i++) {
       })
    })(i);
 }
+```
 This solution works because of the reason that the IIFE creates a new scope for every iteration and we capture the value of i and pass it into the currentIndex parameter so the value of currentIndex is different for every iteration when we invoke the IIFE.
 
 # 27. What is the use Function.prototype.apply method?
 The apply invokes a function specifying the this or the "owner" object of that function on that time of invocation.
+```js
 const details = {
   message: 'Hello World!'
 };
@@ -836,7 +923,9 @@ function getMessage(){
 }
 
 getMessage.apply(details); // returns 'Hello World!'
+```
 This method works like Function.prototype.call the only difference is how we pass arguments. In apply we pass arguments as an array.
+```js
 const person = {
   name: "Marko Polo"
 };
@@ -846,8 +935,10 @@ function greeting(greetingMessage) {
 }
 
 greeting.apply(person, ['Hello']); // returns "Hello Marko Polo!"
+```
 # 28. What is the use Function.prototype.call method?
 The call invokes a function specifying the this or the "owner" object of that function on that time of invocation.
+```js
 const details = {
   message: 'Hello World!'
 };
@@ -857,7 +948,9 @@ function getMessage(){
 }
 
 getMessage.call(details); // returns 'Hello World!'
+```
 This method works like Function.prototype.apply the only difference is how we pass arguments. In call we pass directly the arguments separating them with a comma , for every argument.
+```js
 const person = {
   name: "Marko Polo"
 };
@@ -867,8 +960,10 @@ function greeting(greetingMessage) {
 }
 
 greeting.call(person, 'Hello'); // returns "Hello Marko Polo!"
+```
 # 29. What's the difference between Function.prototype.apply and Function.prototype.call?
 The only difference between apply and call is how we pass the arguments in the function being called. In apply we pass the arguments as an array and in call we pass the arguments directly in the argument list.
+```js
 const obj1 = {
  result:0
 };
@@ -887,9 +982,11 @@ function reduceAdd(){
 
 reduceAdd.apply(obj1, [1, 2, 3, 4, 5]); // returns 15
 reduceAdd.call(obj2, 1, 2, 3, 4, 5); // returns 15
+```
 # 30. What is the usage of Function.prototype.bind?
 The bind method returns a new function that is bound
 to a specific this value or the "owner" object, So we can use it later in our code. The call,apply methods invokes the function immediately instead of returning a new function like the bind method.
+```js
 import React from 'react';
 
 class MyComponent extends React.Component {
@@ -917,6 +1014,7 @@ class MyComponent extends React.Component {
         )
      }
 }
+```
 # 31. What is Functional Programming and what are the features of JavaScript that makes it a candidate as a functional language?
 Functional Programming is a declarative programming paradigm or pattern on how we build our applications with functions using expressions that calculates a value without mutating or changing the arguments that are passed to it.
 
@@ -927,6 +1025,7 @@ const words = ["Functional", "Procedural", "Object-Oriented"];
 
 const wordsLength = words.map(word => word.length);
 The filter method creates a new array with all elements that pass the test in the callback function.
+```js
 const data = [
   { name: 'Mark', isRegistered: true },
   { name: 'Mary', isRegistered: false },
@@ -934,19 +1033,22 @@ const data = [
 ];
 
 const registeredUsers = data.filter(user => user.isRegistered);
+```
 The reduce method applies a function against an accumulator and each element in the array (from left to right) to reduce it to a single value.
 const strs = ["I", " ", "am", " ", "Iron", " ", "Man"];
 const result = strs.reduce((acc, currentStr) => acc + str, "");
 32. What are Higher Order Functions?
 Higher-Order Function are functions that can return a function or receive argument or arguments which has a value of a function.
+```js
 function higherOrderFunction(param,callback){
     return callback(param);
 }
+```
 # 33. Why are functions called First-class Objects?
-↑Functions in JavaScript are First-class Objects because they are treated as any other value in the language. They can be assigned to variables, they can be properties of an object which are called methods, they can be an item in array, they can be passed as arguments to a function, and they can be returned as values of a function. The only difference between a function and any other value in JavaScript is that functions can be invoked or called.
+Functions in JavaScript are First-class Objects because they are treated as any other value in the language. They can be assigned to variables, they can be properties of an object which are called methods, they can be an item in array, they can be passed as arguments to a function, and they can be returned as values of a function. The only difference between a function and any other value in JavaScript is that functions can be invoked or called.
 
 # 34. Implement the Array.prototype.map method by hand.
-↑
+```js
 function map(arr, mapCallback) {
   // First, we check if the parameters passed are right.
   if (!Array.isArray(arr) || !arr.length || typeof mapCallback !== 'function') { 
@@ -962,12 +1064,13 @@ function map(arr, mapCallback) {
     return result; // return the result array
   }
 }
+```
 As the MDN description of the Array.prototype.map method.
 
-The map() method creates a new array with the results of calling a provided function on every element in the calling array.
+The `map()` method creates a new array with the results of calling a provided function on every element in the calling array.
 
 # 35. Implement the Array.prototype.filter method by hand.
-↑
+```js
 function filter(arr, filterCallback) {
   // First, we check if the parameters passed are right.
   if (!Array.isArray(arr) || !arr.length || typeof filterCallback !== 'function') 
@@ -987,12 +1090,13 @@ function filter(arr, filterCallback) {
     return result; // return the result array
   }
 }
+```
 As the MDN description of the Array.prototype.filter method.
 
 The filter() method creates a new array with all elements that pass the test implemented by the provided function.
 
 # 36. Implement the Array.prototype.reduce method by hand.
-↑
+```js
 function reduce(arr, reduceCallback, initialValue) {
   // First, we check if the parameters passed are right.
   if (!Array.isArray(arr) || !arr.length || typeof reduceCallback !== 'function') 
@@ -1015,6 +1119,7 @@ function reduce(arr, reduceCallback, initialValue) {
     return value;
   }
 }
+```
 As the MDN description of the Array.prototype.reduce method.
 
 The reduce() method executes a reducer function (that you provide) on each element of the array, resulting in a single output value.
@@ -1024,6 +1129,7 @@ The arguments object is a collection of parameter values pass in a function. It'
 It helps us know the number of arguments pass in a function.
 
 We can convert the arguments object into an array using the Array.prototype.slice.
+```js
 function one() {
   return Array.prototype.slice.call(arguments);
 }
@@ -1041,12 +1147,16 @@ const three = function three() {
 const four = () => arguments;
 
 four(); // Throws an error  - arguments is not defined
+```
 When we invoke the function four it throws a ReferenceError: arguments is not defined error. We can solve this problem if your envinroment supports the rest syntax.
+```js
 const four = (...args) => args;
+```
 This puts all parameter values in an array automatically.
 
 # 38. How to create an object without a prototype?
 We can create an object without a prototype using the Object.create method.
+```js
    const o1 = {};
    console.log(o1.toString()); 
    // logs [object Object] get this method to the Object.prototype 
@@ -1055,65 +1165,70 @@ We can create an object without a prototype using the Object.create method.
    // the first parameter is the prototype of the object "o2" which in this
    // case will be null specifying we don't want any prototype
    console.log(o2.toString());
-   // throws an error o2.toString is not a function 
+   // throws an error o2.toString is not a function
+```
 # 39. Why does b in this code become a global variable when you call this function?
-↑
+```js
 function myFunc() {
   let a = b = 0;
 }
 
 myFunc();
+```
 The reason for this is that assignment operator or = has right-to-left associativity or evaluation. What this means is that when multiple assignment operators appear in a single expression they evaluated from right to left. So our code becomes likes this.
+```js
 function myFunc() {
   let a = (b = 0);
 }
 
 myFunc();
+```
 First, the expression b = 0 evaluated and in this example b is not declared. So, The JS Engine makes a global variable b outside this function after that the return value of the expression b = 0 would be 0 and it's assigned to the new local variable a with a let keyword.
 
 We can solve this problem by declaring the variables first before assigning them with value.
+```js
 function myFunc() {
   let a,b;
   a = b = 0;
 }
 myFunc();
+```
 # 40. What is ECMAScript?
 ECMAScript is a standard for making scripting languages which means that JavaScript follows the specification changes in ECMAScript standard because it is the blueprint of JavaScript.
 
 # 41. What are the new features in ES6 or ECMAScript 2015?
-↑
+* Arrow Functions
 
-Arrow Functions
+* Classes
 
-Classes
+* Template Strings
 
-Template Strings
+* Enhanced Object literals
 
-Enhanced Object literals
+* Object Destructuring
 
-Object Destructuring
+* Promises
 
-Promises
+* Generators
 
-Generators
+* Modules
 
-Modules
+* Symbol
 
-Symbol
+* Proxies
 
-Proxies
+* Sets
 
-Sets
+* Default Function parameters
 
-Default Function parameters
+* Rest and Spread
 
-Rest and Spread
-
-Block Scoping with let and const
+* Block Scoping with let and const
 
 # 42. What's the difference between var, let and const keywords?
 Variables declared with var keyword are function scoped.
 What this means that variables can be accessed across that function even if we declare that variable inside a block.
+```js
 function giveMeX(showX) {
   if (showX) {
     var x = 5;
@@ -1123,9 +1238,11 @@ function giveMeX(showX) {
 
 console.log(giveMeX(false));
 console.log(giveMeX(true));
+```
 The first console.log statement logs undefined
 and the second 5. We can access the x variable due
 to the reason that it gets hoisted at the top of the function scope. So our function code is intepreted like this.
+```js
 function giveMeX(showX) {
   var x; // has a default value of undefined
   if (showX) {
@@ -1133,9 +1250,11 @@ function giveMeX(showX) {
   }
   return x;
 }
+```
 If you are wondering why it logs undefined in the first console.log statement remember variables declared without an initial value has a default value of undefined.
 
 Variables declared with let and const keyword are block scoped. What this means that variable can only be accessed on that block {} on where we declare it.
+```js
 function giveMeX(showX) {
   if (showX) {
     let x = 5;
@@ -1150,12 +1269,14 @@ function giveMeY(showY) {
   }
   return y;
 }
+```
 If we call this functions with an argument of false it throws a Reference Error because we can't access the x and y variables outside that block and those variables are not hoisted.
 
 There is also a difference between let and const we can assign new values using let but we can't in const but const are mutable meaning. What this means is if the value that we assign to a const is an object we can change the values of those properties but can't reassign a new value to that variable.
 
 # 43. What are Arrow functions?
 Arrow Functions are a new way of making functions in JavaScript. Arrow Functions takes a little time in making functions and has a cleaner syntax than a function expression because we omit the function keyword in making them.
+```js
 //ES5 Version
 var getCurrentDate = function (){
   return new Date();
@@ -1163,7 +1284,9 @@ var getCurrentDate = function (){
 
 //ES6 Version
 const getCurrentDate = () => new Date();
+```
 In this example, in the ES5 Version have function(){} declaration and return keyword needed to make a function and return a value respectively. In the Arrow Function version we only need the () parentheses and we don't need a return statement because Arrow Functions have a implicit return if we have only one expression or value to return.
+```js
 //ES5 Version
 function greet(name) {
   return 'Hello ' + name + '!';
@@ -1172,12 +1295,13 @@ function greet(name) {
 //ES6 Version
 const greet = (name) => `Hello ${name}`;
 const greet2 = name => `Hello ${name}`;
-
+```
 We can also parameters in Arrow functions the same as the function expressions and function declarations. If we have one parameter in an Arrow Function we can omit the parentheses it is also valid.
 const getArgs = () => arguments
 
 const getArgs2 = (...rest) => rest
 Arrow functions don't have access to the arguments object. So calling the first getArgs func will throw an Error. Instead we can use the rest parameters to get all the arguments passed in an arrow function.
+```js
 const data = {
   result: 0,
   nums: [1, 2, 3, 4, 5],
@@ -1191,10 +1315,12 @@ const data = {
     this.result = addAll();
   }
 };
+```
 Arrow functions don't have their own this value. It captures or gets the this value of lexically enclosing function or in this example, the addAll function copies the this value of the computeResult method and if we declare an arrow function in the global scope the value of this would be the window object.
 
 # 44. What are Classes?
 Classes is the new way of writing constructor functions in JavaScript. It is syntactic sugar for using constructor functions, it still uses prototypes and Prototype-Based Inheritance under the hood.
+```js
    //ES5 Version
    function Person(firstName, lastName, age, address){
       this.firstName = firstName;
@@ -1236,7 +1362,9 @@ Classes is the new way of writing constructor functions in JavaScript. It is syn
            return `${this.firstName} ${this.lastName}`;
         }
    }
+```
 Overriding Methods and Inheriting from another class.
+```js
 //ES5 Version
 Employee.prototype = Object.create(Person.prototype);
 
@@ -1270,8 +1398,9 @@ class Employee extends Person { //Inherits from "Person" class
     return "[object Employee]";
   }
 }
-
+```
 So how do we know that it uses prototypes under the hood?
+```js
    class Something {
 
    }
@@ -1292,14 +1421,18 @@ So how do we know that it uses prototypes under the hood?
    // prototypes under the hoods because the Object.prototype is
    // the last part of the Prototype Chain and "Something"
    // and "AnotherSomething" both inherit from Object.prototype
+```
 # 45. What are Template Literals?
 Template Literals are a new way of making strings in JavaScript. We can make Template Literal by using the backtick or back-quote symbol.
+```js
 //ES5 Version
 var greet = 'Hi I\'m Mark';
 
 //ES6 Version
 let greet = `Hi I'm Mark`;
+```
 In the ES5 version, we need to escape the ' using the \ to escape the normal functionality of that symbol which in this case is to finish that string value. In Template Literals, we don't need to do that.
+```js
 //ES5 Version
 var lastWords = '\n'
   + '   I  \n'
@@ -1313,7 +1446,9 @@ let lastWords = `
     Am
   Iron Man   
 `;
+```
 In the ES5 version, we need to add this \n to have a new line in our string. In Template Literals, we don't need to do that.
+```js
 //ES5 Version
 function greet(name) {
   return 'Hello ' + name + '!';
@@ -1324,26 +1459,32 @@ function greet(name) {
 function greet(name) {
   return `Hello ${name} !`;
 }
+```
 In the ES5 version, If we need to add an expression or value in a string we need to use the + or string concatenation operator. In Template Literals, we can embed an expression using ${expr} which makes it cleaner than the ES5 version.
 
 # 46. What is Object Destructuring?
 Object Destructuring is a new and cleaner way of getting or extracting values from an object or an array.
 
 Suppose we have an object that looks like this.
+```js
 const employee = {
   firstName: "Marko",
   lastName: "Polo",
   position: "Software Developer",
   yearHired: 2017
 };
-
+```
 The old way of getting properties from an object is we make a variable that has the same name as the object property. This way is a hassle because we're making a new variable for every property. Imagine we have a big object with lots of properties and methods using this way in extracting properties will be irritating.
+```js
 var firstName = employee.firstName;
 var lastName = employee.lastName;
 var position = employee.position;
 var yearHired = employee.yearHired;
+```
 If we use object destructuring it looks cleaner and takes a little time than the old way. The syntax for object destructuring is that if we are getting properties in an object we use the {} and inside that, we specify the properties we want to extract and if we are getting data from an array we use the [].
+```js
 let { firstName, lastName, position, yearHired } = employee;
+```
 If we want to change the variable name we want to extract we use the propertyName:newName syntax. In this example the value of fName variable will hold the value of the firstName property and lName variable will hold the value of the lastName property.
 let { firstName: fName, lastName: lName, position, yearHired } = employee;
 We can also have default values when destructuring. In this example, if the firstName property holds an undefined value in the object then when we destructure the firstName variable will hold a default of "Mark".
@@ -1360,6 +1501,7 @@ export is used for exposing functionality from a file or several functionalities
 Exporting functionalites in a File or Named Exports
 
 Using ES5 (CommonJS)
+```js
 // Using ES5 CommonJS - helpers.js
 exports.isNull = function (val) {
   return val === null;
@@ -1372,7 +1514,9 @@ exports.isUndefined = function (val) {
 exports.isNullOrUndefined = function (val) {
   return exports.isNull(val) || exports.isUndefined(val);
 }
+```
 Using ES6 Modules
+```js
 // Using ES6 Modules - helpers.js
 export function isNull(val){
   return val === null;
@@ -1385,9 +1529,9 @@ export function isUndefined(val) {
 export function isNullOrUndefined(val) {
   return isNull(val) || isUndefined(val);
 }
-
-
+```
 Importing functionalites in another File
+```js
 // Using ES5 (CommonJS) - index.js
 const helpers = require('./helpers.js'); // helpers is an object
 const isNull = helpers.isNull;
@@ -1404,9 +1548,10 @@ import * as helpers from './helpers.js'; // helpers is an object
 import { isNull, isUndefined, isNullOrUndefined as isValid } from './helpers.js';
 
 // using "as" for renaming named exports
+```
 Exporting a Single Functionality in a File or Default Exports
-
 Using ES5 (CommonJS)
+```js
 // Using ES5 (CommonJS) - index.js
 class Helpers {
   static isNull(val) {
@@ -1424,7 +1569,9 @@ class Helpers {
 
 
 module.exports = Helpers;
+```
 Using ES6 Modules
+```js
 // Using ES6 Modules - helpers.js
 class Helpers {
   static isNull(val) {
@@ -1441,72 +1588,82 @@ class Helpers {
 }
 
 export default Helpers
+```
 Importing a Single Functionality from another File
 
 Using ES5 (CommonJS)
+```js
 // Using ES5 (CommonJS) - index.js
 const Helpers = require('./helpers.js'); 
 console.log(Helpers.isNull(null));
+```
 Using ES6 Modules
+```js
 import Helpers from '.helpers.js'
 console.log(Helpers.isNull(null));
+```
 This is the basics of using ES6 Modules. I won't explain all about Modules because it's a broad topic and my Post is now really long.
 
 # 48. What is the Set object and how does it work?
 The Set object is an ES6 feature that lets you store unique values, primitives or object references. A value in a Set can only occur once. It checks if a value exists in the set object using the SameValueZero algorithm.
 
 We can make Set instance using Set constructor and we can optionally pass an Iterable as the initial value.
-
+```js
 const set1 = new Set();
 const set2 = new Set(["a","b","c","d","d","e"]);
-
+```
 We can add a new value into the Set instance using the add method and since the add returns the Set object we can chain add calls. If a value already exists in Set object it will not be added again.
-
+```js
 set2.add("f");
 set2.add("g").add("h").add("i").add("j").add("k").add("k");
 // the last "k" will not be added to the set object because it already exists
-
+```
 We can remove a value from the Set instance using the delete method, this method returns a boolean indicating true if a value exists in the Set object and false indicating that value does not exist.
-
+```js
 set2.delete("k") // returns true because "k" exists in the set object
 set2.delete("z") // returns false because "z" does not exists in the set object
-
+```
 We can check if a specific value exists in the Set instance using the has method.
-
+```js
 set2.has("a") // returns true because "a" exists in the set object
 set2.has("z") // returns false because "z" does not exists in the set object
-
+```
 We can get the length of the Set instance using the size property.
-
+```js
 set2.size // returns 10
-
+```
 We can delete or remove all the elements in the Set instance using the clear.
-
+```js
 set2.clear(); // clears the set data
-
+```
 We can use the Set object for removing duplicate elements in an array.
-
+```js
 const numbers = [1, 2, 3, 4, 5, 6, 6, 7, 8, 8, 5];
 const uniqueNums = [...new Set(numbers)]; // has a value of [1,2,3,4,5,6,7,8]
-
+```
 # 49. What is a Callback function?
 A Callback function is a function that is gonna get called at a later point in time.
+```js
 const btnAdd = document.getElementById('btnAdd');
 
 btnAdd.addEventListener('click', function clickCallback(e) {
     // do something useless
 });
+```
 In this example, we wait for the click event in the element with an id of btnAdd, if it is clicked, the clickCallback function is executed. A Callback function adds some functionality to some data or event. The reduce, filter and map methods in Array expects a callback as a parameter. A good analogy for a callback is when you call someone and if they don't answer you leave a message and you expect them to callback. The act of calling someone or leaving a message is the event or data and the callback is the action that you expect to occur later.
 
 # 50. What are Promises?
 Promises are one way in handling asynchronous operations in JavaScript. It represents the value of an asynchronous operation. Promises was made to solve the problem of doing and dealing with async code before promises we're using callbacks.
+```js
 fs.readFile('somefile.txt', function (e, data) {
   if (e) {
     console.log(e);
   }
   console.log(data);
 });
+```
 The problem with this approach if we have another async operation inside the callback and another. We will have a code that is messy and unreadable. This code is called Callback Hell.
+```js
 //Callback Hell yucksss
 fs.readFile('somefile.txt', function (e, data) {
   //your code here
@@ -1517,7 +1674,9 @@ fs.readFile('somefile.txt', function (e, data) {
     })
   })
 })
+```
 If we use promises in this code it will be more readable and easy to understand and easy to maintain.
+```js
 promReadFile('file/path')
   .then(data => {
     return promReaddir('directory');
@@ -1528,6 +1687,7 @@ promReadFile('file/path')
   .catch(e => {
     console.log(e);
   })
+```
 Promises have 3 different states.
 
 Pending - The initial state of a promise. The promise's outcome has not yet been known because the operation has not been completed yet.
