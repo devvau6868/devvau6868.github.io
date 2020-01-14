@@ -5,7 +5,6 @@ date: 2020-01-02 20:00:00 +0700
 description: Visual Studio Code extensions to help your productivity
 img: vscode-extension.gif # Add image post (optional)
 tags: [VSCode, Extensions] # add tag
-toc: true
 ---
  
 Microsoft have made some amazing contributions to the dev community, Visual Studio Code in particular. I recently [made the switch to VSCodium](https://dev.to/misterf/why-and-how-you-should-to-migrate-from-visual-studio-code-to-vscodium-j7d) but this doesn't stop me from using all the same extensions as before.

@@ -5,7 +5,6 @@ date: 2020-01-05 00:00:00 +0300
 description: Why and how you should migrate from Visual Studio Code to VSCodium
 img: vscodium.png # Add image post (optional)
 tags: [VSCode, VSCodium] # add tag
-toc: true
 ---
 In this tutorial we'll go over why you should make the switch, and how you can retain all of your extensions when you do make the switch. It won't take more than a couple of minutes to do the actual change!
 

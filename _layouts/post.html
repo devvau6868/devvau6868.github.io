@@ -21,6 +21,7 @@ layout: home
         <div class="page-date"><span>{{page.date | date: '%Y, %b %d'}}&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
       </header>
       <div class="toc">
+        <h2>Table of Contents</h2>
         {% include toc.html html=content sanitize=true class="inline_toc" id="my_toc" h_min=1 h_max=6 %}
       </div>
       {{content | markdownify}}

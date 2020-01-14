@@ -5,7 +5,6 @@ date: 2020-01-01 00:00:00 +0300
 description: Build a chat app with Laravel and Vue
 img: laravel-vue.png # Add image post (optional)
 tags: [Laravel, Vue] # add tag
-toc: true
 ---
 
 It's been a while since I wrote about Laravel and thought I should do something fun with it. In this tutorial, I will show you how to build a web-based chat application using Laravel and Vue.js quickly. With a simple step by step guide, you will be able to create a system that supports user authentication and authorization before participating in a chat session.
