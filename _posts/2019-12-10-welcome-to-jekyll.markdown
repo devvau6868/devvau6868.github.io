@@ -3,7 +3,7 @@ layout: post
 title:  "Welcome to Jekyll!"
 date:   2019-12-10 15:27:11 +0700
 categories: jekyll update
-img: js-1.png
+img: jekyll.png
 description: Mot bai viet thu vi
 tags: [Jekyll] # add tag
 ---
