@@ -341,14 +341,14 @@ Note: toPrimitive uses first the valueOf method then the toString method in obje
 
 Let's have examples.
 
-| x |  y |   x == y|
-|-|-|-|
-| 5 |  5 |   true| 
-| 1 |  '1'|  true| 
-| null |   undefined  |  true| 
-| 0 |  false |   true
-| '1,2'|   [1,2] |   true| 
-| '[object Object]' |  {}  true| 
+| x                 | y         | x == y |
+| ----------------- | --------- | ------ |
+| 5                 | 5         | true   |
+| 1                 | '1'       | true   |
+| null              | undefined | true   |
+| 0                 | false     | true   |
+| '1,2'             | [1,2]     | true   |
+| '[object Object]' | {}  true  |
 
 These examples all return true.
 
@@ -1021,9 +1021,11 @@ Functional Programming is a declarative programming paradigm or pattern on how w
 JavaScript Array has map, filter, reduce methods which are the most famous functions in the functional programming world because of their usefulness and because they don't mutate or change the array which makes these functions pure and JavaScript supports Closures and Higher Order Functions which are a characteristic of a Functional Programming Language.
 
 The map method creates a new array with the results of calling a provided callback function on every element in the array.
+```js
 const words = ["Functional", "Procedural", "Object-Oriented"];
 
 const wordsLength = words.map(word => word.length);
+```
 The filter method creates a new array with all elements that pass the test in the callback function.
 ```js
 const data = [
@@ -1048,6 +1050,7 @@ function higherOrderFunction(param,callback){
 Functions in JavaScript are First-class Objects because they are treated as any other value in the language. They can be assigned to variables, they can be properties of an object which are called methods, they can be an item in array, they can be passed as arguments to a function, and they can be returned as values of a function. The only difference between a function and any other value in JavaScript is that functions can be invoked or called.
 
 # 34. Implement the Array.prototype.map method by hand.
+
 ```js
 function map(arr, mapCallback) {
   // First, we check if the parameters passed are right.
@@ -1070,6 +1073,7 @@ As the MDN description of the Array.prototype.map method.
 The `map()` method creates a new array with the results of calling a provided function on every element in the calling array.
 
 # 35. Implement the Array.prototype.filter method by hand.
+
 ```js
 function filter(arr, filterCallback) {
   // First, we check if the parameters passed are right.
@@ -1096,6 +1100,7 @@ As the MDN description of the Array.prototype.filter method.
 The filter() method creates a new array with all elements that pass the test implemented by the provided function.
 
 # 36. Implement the Array.prototype.reduce method by hand.
+
 ```js
 function reduce(arr, reduceCallback, initialValue) {
   // First, we check if the parameters passed are right.
@@ -1702,7 +1707,7 @@ The Promise constructor has two parameters which are functions resolve and rejec
 If the async operation has been completed without errors call the resolve function to resolve the promise or if an error occurred
 call the reject function and pass the error or reason to it.
 We can access the result of the fulfilled promise using the .then
-method and we catch errors in the .catch method. We chain multiple async promise operations in the .then method because the .then method returns a Promise just like the example in the imag e above.
+method and we catch errors in the .catch method. We chain multiple async promise operations in the .then method because the .then method returns a Promise just like the example in the image above.
 ```js
 const myPromiseAsync = (...args) => {
   return new Promise((resolve, reject) => {
@@ -1981,12 +1986,12 @@ function isEven(num) {
 `7` in binary is `111`.
 and so on...
 
-| a |   b |   a & b| 
-|-|-|-|
-| 0 |   0 |   0| 
-| 0 |   1 |   0| 
-| 1 |   0 |   0| 
-| 1 |   1 |   1| 
+| a   | b   | a & b |
+| --- | --- | ----- |
+| 0   | 0   | 0     |
+| 0   | 1   | 0     |
+| 1   | 0   | 0     |
+| 1   | 1   | 1     |
 So when we console.log this expression 5 & 1 it returns 1. Ok, first the & operator converts both numbers to binary so 5 turns to 101 and 1 turns to 001.
 Then it compares every bit (0's and 1's) using the bitwise AND operator. 101 & 001. As we can see from the table the result can be only 1 if a AND b are 1.
 
@@ -2127,6 +2132,7 @@ Read Hoisting here.
 There are 4 ways that a function can be invoked in JavaScript. The invocation determines the value of this or the "owner" object of that function.
 
 * **Invocation as a function** - If a function isn't invoked as a method, as a constructor or with the apply, call methods then it is invoked as a function. The "owner" object of this function will be the window object.
+```js
   //Global Scope
 
   function add(a,b){
@@ -2145,6 +2151,7 @@ There are 4 ways that a function can be invoked in JavaScript. The invocation de
   o.method(function (){
       console.log(this); // logs the "window" object
   });
+```
 * **Invocation as a method** - If a property of an object has a value of a function we call it a method. When that method is invoked the this value of that method will be that object.
 ```js
    const details = {
